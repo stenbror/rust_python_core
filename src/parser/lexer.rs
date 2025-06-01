@@ -723,7 +723,7 @@ mod lexical_analyzer_tests {
         }
     }
 
-     #[test]
+    #[test]
     fn test_shift_left_operator() {
         let symbols = PythonCoreLexer::new("<<").tokenize_source();
 
@@ -789,6 +789,86 @@ mod lexical_analyzer_tests {
 
         let expected: Vec<Token> = vec![
             Token::Less(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+    
+    #[test]
+    fn test_shift_right_operator() {
+        let symbols = PythonCoreLexer::new(">>").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::ShiftRight(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_shift_right_assign_operator() {
+        let symbols = PythonCoreLexer::new(">>=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::ShiftRightAssign(1, 1),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_greater_equal_operator() {
+        let symbols = PythonCoreLexer::new(">=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::GreaterEqual(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_greater_operator() {
+        let symbols = PythonCoreLexer::new(">").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Greater(1, 1),
             Token::EOF(1, 2)
         ];
 
