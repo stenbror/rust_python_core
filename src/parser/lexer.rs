@@ -343,6 +343,15 @@ impl PythonCoreLexer {
                         nodes.push(Token::Bang(self.line, self.column - 1))
                     }
                 },
+                ':' => {
+                    self.advance();
+                    if let Some('=') = self.peek() {
+                        self.advance();
+                        nodes.push(Token::ColonEqual(self.line, self.column - 2))
+                    } else {
+                        nodes.push(Token::Colon(self.line, self.column - 1))
+                    }
+                },
                 _ => {
                     let _ = self.advance();
                 }
@@ -968,6 +977,46 @@ mod lexical_analyzer_tests {
 
         let expected: Vec<Token> = vec![
             Token::NotEqual(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_colon_operator() {
+        let symbols = PythonCoreLexer::new(":").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Colon(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_colon_assign_operator() {
+        let symbols = PythonCoreLexer::new(":=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::ColonEqual(1, 1),
             Token::EOF(1, 3)
         ];
 
