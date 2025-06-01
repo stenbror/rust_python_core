@@ -147,7 +147,7 @@ impl PythonCoreLexer {
             None
         }
     }
-    
+
     fn is_identifier_start(&self, ch: char) -> bool {
         match ch {
             '_' => true,
@@ -155,7 +155,7 @@ impl PythonCoreLexer {
             _ => false
         }
     }
-    
+
     fn is_identifier_char(&self, ch: char) -> bool {
         match ch {
             '_' => true,
@@ -184,7 +184,7 @@ impl PythonCoreLexer {
                             break;
                         }
                     }
-                    
+
                     match text.as_str() {
                         "False" => nodes.push(Token::False(self.line, pos)),
                         "True" => nodes.push(Token::True(self.line, pos)),
@@ -459,7 +459,7 @@ impl PythonCoreLexer {
                 },
                 '.' => {
                     self.advance();
-                    
+
                     nodes.push(Token::Period(self.line, self.column - 1))
                 },
                 _ => {
@@ -1580,4 +1580,346 @@ mod lexical_analyzer_tests {
             }
         }
     }
+
+    #[test]
+    fn test_keyword_def() {
+        let symbols = PythonCoreLexer::new("def").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Def(1, 1),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_del() {
+        let symbols = PythonCoreLexer::new("del").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Del(1, 1),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_elif() {
+        let symbols = PythonCoreLexer::new("elif").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Elif(1, 1),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_except() {
+        let symbols = PythonCoreLexer::new("except").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Except(1, 1),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_finally() {
+        let symbols = PythonCoreLexer::new("finally").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Finally(1, 1),
+            Token::EOF(1, 8)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_for() {
+        let symbols = PythonCoreLexer::new("for").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::For(1, 1),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_from() {
+        let symbols = PythonCoreLexer::new("from").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::From(1, 1),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_global() {
+        let symbols = PythonCoreLexer::new("global").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Global(1, 1),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_if() {
+        let symbols = PythonCoreLexer::new("if").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::If(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_import() {
+        let symbols = PythonCoreLexer::new("import").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Import(1, 1),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_in() {
+        let symbols = PythonCoreLexer::new("in").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::In(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_is() {
+        let symbols = PythonCoreLexer::new("is").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Is(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_lambda() {
+        let symbols = PythonCoreLexer::new("lambda").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Lambda(1, 1),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_nonlocal() {
+        let symbols = PythonCoreLexer::new("nonlocal").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Nonlocal(1, 1),
+            Token::EOF(1, 9)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_not() {
+        let symbols = PythonCoreLexer::new("not").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Not(1, 1),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_or() {
+        let symbols = PythonCoreLexer::new("or").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Or(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_pass() {
+        let symbols = PythonCoreLexer::new("pass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Pass(1, 1),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+
 }
