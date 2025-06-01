@@ -391,6 +391,11 @@ impl PythonCoreLexer {
                     self.advance();
                     nodes.push(Token::BitwiseInvert(self.line, self.column - 1))
                 },
+                '.' => {
+                    self.advance();
+                    
+                    nodes.push(Token::Period(self.line, self.column - 1))
+                },
                 _ => {
                     let _ = self.advance();
                 }
@@ -1236,6 +1241,26 @@ mod lexical_analyzer_tests {
 
         let expected: Vec<Token> = vec![
             Token::BitwiseInvert(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_periodt_operator() {
+        let symbols = PythonCoreLexer::new(".").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Period(1, 1),
             Token::EOF(1, 2)
         ];
 
