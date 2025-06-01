@@ -352,6 +352,33 @@ impl PythonCoreLexer {
                         nodes.push(Token::Colon(self.line, self.column - 1))
                     }
                 },
+                '&' => {
+                    self.advance();
+                    if let Some('=') = self.peek() {
+                        self.advance();
+                        nodes.push(Token::BitwiseAndAssign(self.line, self.column - 2))
+                    } else {
+                        nodes.push(Token::BitwiseAnd(self.line, self.column - 1))
+                    }
+                },
+                '|' => {
+                    self.advance();
+                    if let Some('=') = self.peek() {
+                        self.advance();
+                        nodes.push(Token::BitwiseOrAssign(self.line, self.column - 2))
+                    } else {
+                        nodes.push(Token::BitwiseOr(self.line, self.column - 1))
+                    }
+                },
+                '^' => {
+                    self.advance();
+                    if let Some('=') = self.peek() {
+                        self.advance();
+                        nodes.push(Token::BitwiseXorAssign(self.line, self.column - 2))
+                    } else {
+                        nodes.push(Token::BitwiseXor(self.line, self.column - 1))
+                    }
+                },
                 _ => {
                     let _ = self.advance();
                 }
@@ -1017,6 +1044,126 @@ mod lexical_analyzer_tests {
 
         let expected: Vec<Token> = vec![
             Token::ColonEqual(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_and_operator() {
+        let symbols = PythonCoreLexer::new("&").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseAnd(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_and_assign_operator() {
+        let symbols = PythonCoreLexer::new("&=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseAndAssign(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_or_operator() {
+        let symbols = PythonCoreLexer::new("|").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseOr(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_or_assign_operator() {
+        let symbols = PythonCoreLexer::new("|=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseOrAssign(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_xor_operator() {
+        let symbols = PythonCoreLexer::new("^").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseXor(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_xor_assign_operator() {
+        let symbols = PythonCoreLexer::new("^=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseXorAssign(1, 1),
             Token::EOF(1, 3)
         ];
 
