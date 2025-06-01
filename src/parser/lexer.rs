@@ -91,8 +91,8 @@ pub enum Token
     ShiftLeftAssign(usize, usize),
     ShiftRightAssign(usize, usize),
     PowerAssign(usize, usize),
-    Name(usize, usize, Box<str>),
-    Number(usize, usize, Box<str>),
+    Name(usize, usize, String),
+    Number(usize, usize, String),
     String(usize, usize, Vec::<Box<str>>)
 }
 
@@ -150,6 +150,23 @@ impl PythonCoreLexer {
             None
         }
     }
+    
+    fn is_identifier_start(&self, ch: char) -> bool {
+        match ch {
+            '_' => true,
+            'a'..='z' | 'A'..='Z' => true,
+            _ => false
+        }
+    }
+    
+    fn is_identifier_char(&self, ch: char) -> bool {
+        match ch {
+            '_' => true,
+            'a'..='z' | 'A'..='Z' => true,
+            '0'..='9' => true,
+            _ => false
+        }
+    }
 
 
 
@@ -158,6 +175,25 @@ impl PythonCoreLexer {
 
         while let Some(ch) = self.peek() {
             match ch {
+                ch if self.is_identifier_start(ch) => {
+                    let pos = self.column;
+                    let mut text = String::new();
+
+                    while let Some(ch) = self.peek() {
+                        if self.is_identifier_char(ch) {
+                            text.push(ch);
+                            self.advance();
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    match text.as_str() {
+                        "False" => nodes.push(Token::False(self.line, pos)),
+                        
+                        _ => nodes.push(Token::Name(self.line, pos, text))
+                    }
+                },
                 '(' => {
                     self.advance();
                     self.parenthesis_stack.push(ch);
@@ -1262,6 +1298,46 @@ mod lexical_analyzer_tests {
         let expected: Vec<Token> = vec![
             Token::Period(1, 1),
             Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_name_literal() {
+        let symbols = PythonCoreLexer::new("__init__").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Name(1, 1, "__init__".to_string()),
+            Token::EOF(1, 9)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_false() {
+        let symbols = PythonCoreLexer::new("False").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::False(1, 1),
+            Token::EOF(1, 6)
         ];
 
         match symbols {
