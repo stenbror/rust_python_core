@@ -14,11 +14,9 @@ pub enum Token
     Async(usize, usize),
     Await(usize, usize),
     Break(usize, usize),
-    Case(usize, usize),
     Class(usize, usize),
     Continue(usize, usize),
     Def(usize, usize),
-    Default(usize, usize),
     Del(usize, usize),
     Elif(usize, usize),
     Else(usize, usize),
@@ -34,7 +32,6 @@ pub enum Token
     Lambda(usize, usize),
     Nonlocal(usize, usize),
     Not(usize, usize),
-    Match(usize, usize),
     Or(usize, usize),
     Pass(usize, usize),
     Raise(usize, usize),
@@ -190,6 +187,8 @@ impl PythonCoreLexer {
                     
                     match text.as_str() {
                         "False" => nodes.push(Token::False(self.line, pos)),
+                        "True" => nodes.push(Token::True(self.line, pos)),
+                        "None" => nodes.push(Token::None(self.line, pos)),
                         
                         _ => nodes.push(Token::Name(self.line, pos, text))
                     }
@@ -1338,6 +1337,46 @@ mod lexical_analyzer_tests {
         let expected: Vec<Token> = vec![
             Token::False(1, 1),
             Token::EOF(1, 6)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_true() {
+        let symbols = PythonCoreLexer::new("True").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::True(1, 1),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_keyword_none() {
+        let symbols = PythonCoreLexer::new("None").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::None(1, 1),
+            Token::EOF(1, 5)
         ];
 
         match symbols {
