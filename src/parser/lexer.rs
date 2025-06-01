@@ -338,7 +338,7 @@ impl PythonCoreLexer {
 
 #[cfg(test)]
 mod lexical_analyzer_tests {
-    use crate::{PythonCoreLexer, Token};
+    use crate::parser::lexer::{PythonCoreLexer, Token};
 
     #[test]
     fn test_parenthesis() {
