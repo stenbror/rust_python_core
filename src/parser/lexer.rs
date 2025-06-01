@@ -172,6 +172,14 @@ impl PythonCoreLexer {
 
         while let Some(ch) = self.peek() {
             match ch {
+                ' ' => {
+                    self.advance();
+                    continue
+                },
+                '\t' => {
+                    self.advance();
+                    continue
+                },
                 ch if self.is_identifier_start(ch) => {
                     let pos = self.column;
                     let mut text = String::new();
@@ -2048,6 +2056,27 @@ mod lexical_analyzer_tests {
         match symbols {
             Ok(x) => {
                 assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_whitespace_between_tokens() {
+        let symbols = PythonCoreLexer::new("yield a").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Yield(1, 1),
+            Token::Name(1, 7, "a".to_string()),
+            Token::EOF(1, 8)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
                 assert_eq!(expected, x);
             },
             Err(e) => {
