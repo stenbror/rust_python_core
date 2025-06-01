@@ -64,6 +64,7 @@ pub enum Token
     GreaterEqual(usize, usize),
     Equal(usize, usize),
     NotEqual(usize, usize),
+    Bang(usize, usize),
     LeftParen(usize, usize),
     RightParen(usize, usize),
     LeftBracket(usize, usize),
@@ -322,6 +323,24 @@ impl PythonCoreLexer {
                          }
                     } else {
                         nodes.push(Token::Greater(self.line, self.column - 1))
+                    }
+                },
+                '=' => {
+                    self.advance();
+                    if let Some('=') = self.peek() {
+                        self.advance();
+                        nodes.push(Token::Equal(self.line, self.column - 2))
+                    } else {
+                        nodes.push(Token::Assign(self.line, self.column - 1))
+                    }
+                },
+                '!' => {
+                    self.advance();
+                    if let Some('=') = self.peek() {
+                        self.advance();
+                        nodes.push(Token::NotEqual(self.line, self.column - 2))
+                    } else {
+                        nodes.push(Token::Bang(self.line, self.column - 1))
                     }
                 },
                 _ => {
@@ -802,7 +821,7 @@ mod lexical_analyzer_tests {
             }
         }
     }
-    
+
     #[test]
     fn test_shift_right_operator() {
         let symbols = PythonCoreLexer::new(">>").tokenize_source();
@@ -882,4 +901,85 @@ mod lexical_analyzer_tests {
             }
         }
     }
+
+    #[test]
+    fn test_assign_operator() {
+        let symbols = PythonCoreLexer::new("=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Assign(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_equal_operator() {
+        let symbols = PythonCoreLexer::new("==").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Equal(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bang_operator() {
+        let symbols = PythonCoreLexer::new("!").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Bang(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_not_equal_operator() {
+        let symbols = PythonCoreLexer::new("!=").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::NotEqual(1, 1),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
 }
