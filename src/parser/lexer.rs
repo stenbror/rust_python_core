@@ -224,6 +224,26 @@ impl PythonCoreLexer {
                         _ => nodes.push(Token::Name(self.line, pos, text))
                     }
                 },
+                '0'..='9' | '.' => {
+                    let pos = self.column;
+                    let mut dot_seen = false;
+                    let mut text = String::new();
+                    
+                    if (ch == '.') {
+                        text.push(ch);
+                        dot_seen = true;
+                        self.advance();
+                        
+                        match self.peek() {
+                            Some('0'..='9') => {},
+                            _ => {
+                                nodes.push(Token::Period(self.line, pos));
+                                continue;
+                            }
+                        }
+                    }
+                    todo!()
+                }
                 '(' => {
                     self.advance();
                     self.parenthesis_stack.push(ch);
@@ -456,11 +476,6 @@ impl PythonCoreLexer {
                 '~' => {
                     self.advance();
                     nodes.push(Token::BitwiseInvert(self.line, self.column - 1))
-                },
-                '.' => {
-                    self.advance();
-
-                    nodes.push(Token::Period(self.line, self.column - 1))
                 },
                 _ => {
                     let _ = self.advance();
