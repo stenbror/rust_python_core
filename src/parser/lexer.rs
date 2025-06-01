@@ -379,6 +379,18 @@ impl PythonCoreLexer {
                         nodes.push(Token::BitwiseXor(self.line, self.column - 1))
                     }
                 },
+                ';' => {
+                    self.advance();
+                    nodes.push(Token::Semicolon(self.line, self.column - 1))
+                },
+                ',' => {
+                    self.advance();
+                    nodes.push(Token::Comma(self.line, self.column - 1))
+                },
+                '~' => {
+                    self.advance();
+                    nodes.push(Token::BitwiseInvert(self.line, self.column - 1))
+                },
                 _ => {
                     let _ = self.advance();
                 }
@@ -1178,4 +1190,63 @@ mod lexical_analyzer_tests {
         }
     }
 
+    #[test]
+    fn test_semicolon_operator() {
+        let symbols = PythonCoreLexer::new(";").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Semicolon(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_comma_operator() {
+        let symbols = PythonCoreLexer::new(",").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Comma(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_bitwise_invert_operator() {
+        let symbols = PythonCoreLexer::new("~").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::BitwiseInvert(1, 1),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
 }
