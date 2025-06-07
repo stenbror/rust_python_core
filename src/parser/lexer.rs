@@ -90,7 +90,7 @@ pub enum Token
     PowerAssign(usize, usize),
     Name(usize, usize, String),
     Number(usize, usize, String),
-    String(usize, usize, Vec::<Box<str>>)
+    String(usize, usize, String)
 }
 
 
@@ -164,9 +164,78 @@ impl PythonCoreLexer {
             _ => false
         }
     }
-    
-    fn handle_strings(&self, prefix: Option<String>, ch: char, start_line: usize, start_column: usize) -> Result<Token, SyntaxError> {
-        Ok(Token::EOF(start_line, start_column))
+
+    fn handle_strings(&mut self, prefix: Option<String>, ch: char, start_line: usize, start_column: usize) -> Result<Token, SyntaxError> {
+        let mut text = String::new();
+        let mut is_tripple = false;
+        let mut complete = false;
+        match prefix {
+            Some(prefix) => {
+                text += &prefix
+            },
+            _ => ()
+        }
+        text.push(ch);
+        self.advance();
+        
+        /* Handle start of strings and possible empty strings */
+        if let Some(ch2) = self.peek() {
+            match ch2 {
+                '\'' if ch2 == ch  => {
+                    text.push(ch2);
+                    self.advance();
+                    let ch3 = self.peek();
+                    match ch3 {
+                        Some('\'') => {
+                            text.push('\'');
+                            self.advance();
+                            is_tripple = true;
+                        },
+                        _ => {
+                            return Ok(Token::String(start_line, start_column, text))
+                        }
+                    }
+                },
+                '"' if ch2 == ch => {
+                    text.push(ch2);
+                    self.advance();
+                    let ch3 = self.peek();
+                    match ch3 {
+                        Some('"') => {
+                            text.push('"');
+                            self.advance();
+                            is_tripple = true;
+                        },
+                        _ => {
+                            return Ok(Token::String(start_line, start_column, text))
+                        }
+                    }
+                },
+                _ => ()
+            }
+        } 
+        
+        /* Handle rest of string including terminating quotes */
+        while let Some(ch2) = self.peek() {
+            match ch2 {
+                '\'' if ch2 == ch  => {
+                    text.push(ch2);
+                    self.advance();
+                    
+                },
+                '"' if ch2 == ch => {},
+                _ => {
+                    text.push(ch2);
+                    self.advance();
+                }
+            }
+        }
+
+        if !complete {
+            return Err(SyntaxError::new(start_line, start_column, "Unterminated string".to_string()));
+        }
+
+        Ok(Token::String(start_line, start_column, text))
     }
 
 
@@ -200,13 +269,13 @@ impl PythonCoreLexer {
                             break;
                         }
                     }
-                    
+
                     /* Check for prefix to string */
                     match text.as_str() {
                         "r" | "u" | "R" | "U" | "f" | "F" | "t" | "T"
                         | "fr" | "Fr" | "fR" | "FR" | "rf" | "rF" | "Rf" | "RF"
                         | "tr" | "Tr" | "tR" | "TR" | "rt" | "rT" | "Rt" | "RT" => {
-                            
+
                             let peek_char = self.peek();
                             match &peek_char {
                                 Some('"') | Some('\'') => {
@@ -218,7 +287,7 @@ impl PythonCoreLexer {
                         },
                         _ => ()
                     }
-                    
+
                     match text.as_str() {
                         "False" => nodes.push(Token::False(self.line, pos)),
                         "True" => nodes.push(Token::True(self.line, pos)),
@@ -262,12 +331,12 @@ impl PythonCoreLexer {
                     let pos = self.column;
                     let mut dot_seen = false;
                     let mut text = String::new();
-                    
+
                     if (ch == '.') {
                         text.push(ch);
                         dot_seen = true;
                         self.advance();
-                        
+
                         match self.peek() {
                             Some('0'..='9') => {},
                             _ => {
@@ -2103,6 +2172,46 @@ mod lexical_analyzer_tests {
         match symbols {
             Ok(x) => {
                 assert_eq!(3, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_sinqle_quote_string_token() {
+        let symbols = PythonCoreLexer::new("''").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("''")),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_token() {
+        let symbols = PythonCoreLexer::new("\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("\"\"")),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
             Err(e) => {
