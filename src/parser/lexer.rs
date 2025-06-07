@@ -164,6 +164,10 @@ impl PythonCoreLexer {
             _ => false
         }
     }
+    
+    fn handle_strings(&self, prefix: Option<String>, ch: char, start_line: usize, start_column: usize) -> Result<Token, SyntaxError> {
+        Ok(Token::EOF(start_line, start_column))
+    }
 
 
 
@@ -180,6 +184,10 @@ impl PythonCoreLexer {
                     self.advance();
                     continue
                 },
+                '\'' | '"' => {
+                    nodes.push(self.handle_strings(None, ch, self.line, self.column)?);
+                    continue;
+                },
                 ch if self.is_identifier_start(ch) => {
                     let pos = self.column;
                     let mut text = String::new();
@@ -192,7 +200,25 @@ impl PythonCoreLexer {
                             break;
                         }
                     }
-
+                    
+                    /* Check for prefix to string */
+                    match text.as_str() {
+                        "r" | "u" | "R" | "U" | "f" | "F" | "t" | "T"
+                        | "fr" | "Fr" | "fR" | "FR" | "rf" | "rF" | "Rf" | "RF"
+                        | "tr" | "Tr" | "tR" | "TR" | "rt" | "rT" | "Rt" | "RT" => {
+                            
+                            let peek_char = self.peek();
+                            match &peek_char {
+                                Some('"') | Some('\'') => {
+                                    nodes.push(self.handle_strings(Some(text), peek_char.unwrap(), self.line, pos)?);
+                                    continue;
+                                },
+                                _ => ()
+                            }
+                        },
+                        _ => ()
+                    }
+                    
                     match text.as_str() {
                         "False" => nodes.push(Token::False(self.line, pos)),
                         "True" => nodes.push(Token::True(self.line, pos)),
