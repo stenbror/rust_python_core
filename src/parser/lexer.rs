@@ -177,7 +177,7 @@ impl PythonCoreLexer {
         }
         text.push(ch);
         self.advance();
-        
+
         /* Handle start of strings and possible empty strings */
         if let Some(ch2) = self.peek() {
             match ch2 {
@@ -213,19 +213,75 @@ impl PythonCoreLexer {
                 },
                 _ => ()
             }
-        } 
-        
+        }
+
         /* Handle rest of string including terminating quotes */
-        while let Some(ch2) = self.peek() {
-            match ch2 {
-                '\'' if ch2 == ch  => {
-                    text.push(ch2);
+        while let Some(ch4) = self.peek() {
+            match ch4 {
+                '\'' if ch4 == ch  => {
+                    text.push(ch4);
                     self.advance();
                     
+                    match self.peek() {
+                        Some('\'') if is_tripple => {
+                            text.push('\'');
+                            self.advance();
+                            
+                            match self.peek() {
+                                Some('\'') if is_tripple => {
+                                    text.push('\'');
+                                    self.advance();
+                                    complete = true
+                                },
+                                _ => {
+                                    continue
+                                }
+                            }
+                        },
+                        _ => {
+                            complete = true
+                        }
+                    }
                 },
-                '"' if ch2 == ch => {},
+                '"' if ch4 == ch => {
+                    text.push(ch4);
+                    self.advance();
+
+                    match self.peek() {
+                        Some('"') if is_tripple => {
+                            text.push('"');
+                            self.advance();
+
+                            match self.peek() {
+                                Some('"') if is_tripple => {
+                                    text.push('"');
+                                    self.advance();
+                                    complete = true
+                                },
+                                _ => {
+                                    continue
+                                }
+                            }
+                        },
+                        _ => {
+                            complete = true
+                        }
+                    }
+                },
+                '\\' => {
+                    text.push(ch4);
+                    self.advance();
+                    let ch5 = self.peek();
+                    match ch5 {
+                        Some(ch6) => {
+                            text.push(ch6);
+                            self.advance();
+                        },
+                        _ => ()
+                    }
+                },
                 _ => {
-                    text.push(ch2);
+                    text.push(ch4);
                     self.advance();
                 }
             }
@@ -2687,6 +2743,46 @@ mod lexical_analyzer_tests {
         let expected: Vec<Token> = vec![
             Token::String(1, 1, String::from("RT\"\"")),
             Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_tripple_double_quote_string_token() {
+        let symbols = PythonCoreLexer::new("\"\"\"\"\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("\"\"\"\"\"\"")),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_tripple_single_quote_string_token() {
+        let symbols = PythonCoreLexer::new("''''''").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("''''''")),
+            Token::EOF(1, 7)
         ];
 
         match symbols {
