@@ -2795,4 +2795,84 @@ mod lexical_analyzer_tests {
             }
         }
     }
+
+    #[test]
+    fn test_tripple_double_quote_string_token() {
+        let symbols = PythonCoreLexer::new("\"\"\"Hello, World!\"\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("\"\"\"Hello, World!\"\"\"")),
+            Token::EOF(1, 20)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_tripple_single_quote_string_token() {
+        let symbols = PythonCoreLexer::new("'''Hello, World!'''").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("'''Hello, World!'''")),
+            Token::EOF(1, 20)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_double_quote_string_token() {
+        let symbols = PythonCoreLexer::new("\"Hello, World!\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("\"Hello, World!\"")),
+            Token::EOF(1, 16)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_single_quote_string_token() {
+        let symbols = PythonCoreLexer::new("'Hello, World!'").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("'Hello, World!'")),
+            Token::EOF(1, 16)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
 }
