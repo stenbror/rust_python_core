@@ -2219,4 +2219,164 @@ mod lexical_analyzer_tests {
             }
         }
     }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_r_token() {
+        let symbols = PythonCoreLexer::new("r\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("r\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_capital_r_token() {
+        let symbols = PythonCoreLexer::new("R\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("R\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_u_token() {
+        let symbols = PythonCoreLexer::new("u\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("u\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_capital_u_token() {
+        let symbols = PythonCoreLexer::new("U\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("U\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_f_token() {
+        let symbols = PythonCoreLexer::new("f\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("f\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_capital_f_token() {
+        let symbols = PythonCoreLexer::new("F\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("F\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_t_token() {
+        let symbols = PythonCoreLexer::new("t\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("t\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_double_quote_string_with_prefix_capital_t_token() {
+        let symbols = PythonCoreLexer::new("T\"\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("T\"\"")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
 }
