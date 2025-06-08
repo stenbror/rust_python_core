@@ -175,6 +175,8 @@ impl PythonCoreLexer {
             _ => false
         };
         
+        let is_hex_digit = |ch: char| -> bool { ch.is_ascii_hexdigit()};
+        
         let fraction = | mut text: String| -> Result<(), SyntaxError> {
             match dotted_number {
                 false => text.push('.'),
@@ -301,7 +303,7 @@ impl PythonCoreLexer {
         /* Handle main number loop */
         match dotted_number{
             true => {
-                
+                todo!()
             },
             _ => {
                 match self.peek() {
@@ -310,7 +312,31 @@ impl PythonCoreLexer {
                         self.advance();
                         match self.peek() {
                             Some('x') | Some('X') => {
-                                
+                                text.push(self.advance().unwrap());
+
+                                while true {
+                                    if self.peek() == Some('_') {
+                                        text.push('_');
+                                        self.advance();
+                                    }
+
+                                    let check = self.peek();
+                                    match check {
+                                        Some(ch) if is_hex_digit(ch) => (),
+                                        _ => return Err(SyntaxError::new(line, column, String::from("Expecting digit after '_' in hexadecimal number!")))
+                                    }
+
+                                    while let Some(ch) = self.peek() {
+                                        match ch {
+                                            ch if is_hex_digit(ch) => {
+                                                text.push(self.advance().unwrap());
+                                            },
+                                            _ => break
+                                        }
+                                    }
+
+                                    if self.peek() != Some('_') { break; }
+                                }
                             },
                             Some('o') | Some('O') => {
                                 text.push(self.advance().unwrap());
@@ -363,16 +389,12 @@ impl PythonCoreLexer {
                                 }
                             },
                             _ => {
-                                
+                                todo!()
                             }
                         }
-                        
-                        
-                        
-                        
                     },
                     _ => {
-
+                        todo!()
                     }
                 }
             }
@@ -3309,12 +3331,7 @@ mod lexical_analyzer_tests {
             }
         }
     }
-
-
-
-
-
-
+    
     #[test]
     fn test_octet_number_1_token() {
         let symbols = PythonCoreLexer::new("0o071").tokenize_source();
@@ -3398,6 +3415,102 @@ mod lexical_analyzer_tests {
         let symbols = PythonCoreLexer::new("0o_8").tokenize_source();
 
         let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in octet number!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+    
+    #[test]
+    fn test_hex_number_1_token() {
+        let symbols = PythonCoreLexer::new("0x7f").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0x7f")),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_hex_number_2_token() {
+        let symbols = PythonCoreLexer::new("0X7F").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0X7F")),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_hex_number_3_token() {
+        let symbols = PythonCoreLexer::new("0x_FA_7c").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0x_FA_7c")),
+            Token::EOF(1, 9)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_hex_number_error_1_token() {
+        let symbols = PythonCoreLexer::new("0x0_").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in hexadecimal number!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_hex_number_error_2_token() {
+        let symbols = PythonCoreLexer::new("0X_Z").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in hexadecimal number!"));
 
         match symbols {
             Ok(x) => {
