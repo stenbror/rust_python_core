@@ -167,6 +167,139 @@ impl PythonCoreLexer {
     
     fn handle_numbers(&mut self, prefix_dot: Option<char>, line: usize, column: usize) -> Result<Token, SyntaxError> {
         let mut text = String::new();
+        let dotted_number = match prefix_dot {
+            Some(ch) => {
+                text.push('.');
+                true
+            },
+            _ => false
+        };
+        
+        let fraction = | mut text: String| -> Result<(), SyntaxError> {
+            match dotted_number {
+                false => text.push('.'),
+                _ => {
+                    text.push('.');
+                    self.advance();
+                }
+            }
+
+            match self.peek() {
+                Some(ch) if ch >= '0' && ch <= '9' => {
+                    text.push(ch);
+                    self.advance();
+
+                    while true {
+                        while let Some(ch) = self.peek() {
+                            match ch {
+                                '0'..='9' => {
+                                    text.push(ch);
+                                    self.advance();
+                                },
+                                _ => break
+                            }
+                        }
+
+                        match self.peek() {
+                            Some('_') => {
+                                text.push('_');
+                                self.advance();
+                            },
+                            _ => break
+                        }
+
+                        match self.peek() {
+                            Some(ch) if ch >= '0' && ch <= '9' => (),
+                            _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
+                        }
+
+                    }
+                },
+                _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
+            }
+            
+            Ok(())
+        };
+
+        let exponent = | mut text: String| -> Result<(), SyntaxError> {
+            match self.peek() {
+                Some('e') => {
+                    self.advance();
+                    text.push('e');
+                },
+                Some('E') => {
+                    self.advance();
+                    text.push('E');
+                },
+                _ => return Ok(())
+            }
+            
+            match self.peek() {
+                Some('+') => {
+                    self.advance();
+                    text.push('+');
+                },
+                Some('-') => {
+                    self.advance();
+                    text.push('-');
+                },
+                _ => ()
+            }
+            
+            let check = self.peek();
+            match check {
+                Some(ch) if ch >= '0' && ch <= '9' => {
+                    text.push(ch);
+                    self.advance();
+                    
+                    while true {
+                        while let Some(ch) = self.peek() {
+                            match ch {
+                                '0'..='9' => {
+                                    text.push(ch);
+                                    self.advance();
+                                },
+                                _ => break
+                            }
+                        }
+                        
+                        match self.peek() {
+                            Some('_') => {
+                                text.push('_');
+                                self.advance();
+                            },
+                            _ => break
+                        }
+                        
+                        match self.peek() {
+                            Some(ch) if ch >= '0' && ch <= '9' => (),
+                            _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
+                        }
+                        
+                    }
+                },
+                _ => return Err(SyntaxError::new(line, column, String::from("Invalid number literal in exponent part!")))
+            }
+            
+            Ok(())
+        };
+
+        let imaginary = | mut text: String| -> () {
+            match self.peek() {
+                Some('j') => {
+                    self.advance();
+                    text.push('j');
+                },
+                Some('J') => {
+                    self.advance();
+                    text.push('J');
+                },
+                _ => ()
+            }
+        };
+        
+        /* Handle main number loop */
+       
         
         Ok(Token::Number(line, column, text))
     }
