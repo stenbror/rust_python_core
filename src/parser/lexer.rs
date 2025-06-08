@@ -58,6 +58,140 @@ impl PythonCoreLexer {
         }
     }
 
+    fn handle_imaginary(&mut self) -> Option<String> {
+        let mut text = String::new();
+        match self.peek() {
+            Some('j') => text.push(self.advance()?),
+            Some('J') => text.push(self.advance()?),
+            _ => return None
+        }
+        Some(text)
+    }
+
+    fn handle_exponent(&mut self) -> Result<String, SyntaxError> {
+        let mut text = String::new();
+
+        match self.peek() {
+            Some('e') => {
+                self.advance();
+                text.push('e');
+            },
+            Some('E') => {
+                self.advance();
+                text.push('E');
+            },
+            _ => return Ok(text)
+        }
+
+        match self.peek() {
+            Some('+') => {
+                self.advance();
+                text.push('+');
+            },
+            Some('-') => {
+                self.advance();
+                text.push('-');
+            },
+            _ => ()
+        }
+
+        let check = self.peek();
+        match check {
+            Some(ch) if ch >= '0' && ch <= '9' => {
+                text.push(ch);
+                self.advance();
+
+                loop {
+                    while let Some(ch) = self.peek() {
+                        match ch {
+                            '0'..='9' => {
+                                text.push(ch);
+                                self.advance();
+                            },
+                            _ => break
+                        }
+                    }
+
+                    match self.peek() {
+                        Some('_') => {
+                            text.push('_');
+                            self.advance();
+                        },
+                        _ => break
+                    }
+
+                    match self.peek() {
+                        Some(ch) if ch >= '0' && ch <= '9' => (),
+                        _ => return Err(SyntaxError::new(self.line, self.column, String::from("Invalid number")))
+                    }
+
+                }
+            },
+            _ => return Err(SyntaxError::new(self.line, self.column, String::from("Invalid number literal in exponent part!")))
+        }
+
+        Ok(text)
+    }
+
+    fn handle_fraction(&mut self, dotted_number: bool) -> Result<String, SyntaxError> {
+        let mut text = String::new();
+
+        match dotted_number {
+            true => (),
+            _ => {
+                text.push('.');
+                self.advance();
+            }
+        }
+        
+        let check = self.peek();
+        match check {
+            Some(ch) => {
+                match ch {
+                    '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
+                        text.push(ch);
+                        self.advance();
+                    },
+                    _ => {}
+                }
+            },
+            _ => {}
+        }
+        
+        match self.peek() {
+            Some(ch) => {
+                loop {
+                    while let Some(ch) = self.peek() {
+                        match ch {
+                            '0'..='9' => {
+                                text.push(ch);
+                                self.advance();
+                            },
+                            _ => break
+                        }
+                    }
+
+                    match self.peek() {
+                        Some('_') => {
+                            text.push('_');
+                            self.advance();
+                        },
+                        _ => break
+                    }
+
+                    match self.peek() {
+                        Some(ch) if ch >= '0' && ch <= '9' => (),
+                        _ => return Err(SyntaxError::new(self.line, self.column, String::from("Invalid number")))
+                    }
+
+                }
+            },
+            None => ()
+        }
+
+        Ok(text)
+    }
+
     fn handle_numbers(&mut self, prefix_dot: Option<char>, line: usize, column: usize) -> Result<Token, SyntaxError> {
         let mut text = String::new();
         let dotted_number = match prefix_dot {
@@ -69,134 +203,20 @@ impl PythonCoreLexer {
         };
 
         let is_hex_digit = |ch: char| -> bool { ch.is_ascii_hexdigit()};
-
-        let fraction = | mut text: String| -> Result<(), SyntaxError> {
-            match dotted_number {
-                false => text.push('.'),
-                _ => {
-                    text.push('.');
-                    self.advance();
-                }
-            }
-
-            match self.peek() {
-                Some(ch) if ch >= '0' && ch <= '9' => {
-                    text.push(ch);
-                    self.advance();
-
-                    loop {
-                        while let Some(ch) = self.peek() {
-                            match ch {
-                                '0'..='9' => {
-                                    text.push(ch);
-                                    self.advance();
-                                },
-                                _ => break
-                            }
-                        }
-
-                        match self.peek() {
-                            Some('_') => {
-                                text.push('_');
-                                self.advance();
-                            },
-                            _ => break
-                        }
-
-                        match self.peek() {
-                            Some(ch) if ch >= '0' && ch <= '9' => (),
-                            _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
-                        }
-
-                    }
-                },
-                _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
-            }
-
-            Ok(())
-        };
-
-        let exponent = | mut text: String| -> Result<(), SyntaxError> {
-            match self.peek() {
-                Some('e') => {
-                    self.advance();
-                    text.push('e');
-                },
-                Some('E') => {
-                    self.advance();
-                    text.push('E');
-                },
-                _ => return Ok(())
-            }
-
-            match self.peek() {
-                Some('+') => {
-                    self.advance();
-                    text.push('+');
-                },
-                Some('-') => {
-                    self.advance();
-                    text.push('-');
-                },
-                _ => ()
-            }
-
-            let check = self.peek();
-            match check {
-                Some(ch) if ch >= '0' && ch <= '9' => {
-                    text.push(ch);
-                    self.advance();
-
-                    loop {
-                        while let Some(ch) = self.peek() {
-                            match ch {
-                                '0'..='9' => {
-                                    text.push(ch);
-                                    self.advance();
-                                },
-                                _ => break
-                            }
-                        }
-
-                        match self.peek() {
-                            Some('_') => {
-                                text.push('_');
-                                self.advance();
-                            },
-                            _ => break
-                        }
-
-                        match self.peek() {
-                            Some(ch) if ch >= '0' && ch <= '9' => (),
-                            _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
-                        }
-
-                    }
-                },
-                _ => return Err(SyntaxError::new(line, column, String::from("Invalid number literal in exponent part!")))
-            }
-
-            Ok(())
-        };
-
-        let imaginary = | mut text: String| -> () {
-            match self.peek() {
-                Some('j') => {
-                    self.advance();
-                    text.push('j');
-                },
-                Some('J') => {
-                    self.advance();
-                    text.push('J');
-                },
-                _ => ()
-            }
-        };
-
+        
         /* Handle main number loop */
         match dotted_number{
             true => {
-                todo!()
+                text.push_str(self.handle_fraction(dotted_number)?.as_str());
+                
+                if self.peek() == Some('e') || self.peek() == Some('E') {
+                    text.push_str(self.handle_exponent()?.as_str());
+                }
+
+                match self.handle_imaginary() {
+                    Some(text2) => text.push_str(&text2),
+                    _ => ()
+                }
             },
             _ => {
                 match self.peek() {
@@ -3413,6 +3433,86 @@ mod lexical_analyzer_tests {
                 assert_eq!(1, e.line);
                 assert_eq!(1, e.column);
                 assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_j_token() {
+        let symbols = PythonCoreLexer::new(".1j").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1j")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_j2_token() {
+        let symbols = PythonCoreLexer::new(".0J").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".0J")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_simple_token() {
+        let symbols = PythonCoreLexer::new(".0").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".0")),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_simple_underscore_token() {
+        let symbols = PythonCoreLexer::new(".1_0").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1_0")),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
             }
         }
     }
