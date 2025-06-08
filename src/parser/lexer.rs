@@ -313,7 +313,31 @@ impl PythonCoreLexer {
                                 
                             },
                             Some('o') | Some('O') => {
-                                
+                                text.push(self.advance().unwrap());
+
+                                while true {
+                                    if self.peek() == Some('_') {
+                                        text.push('_');
+                                        self.advance();
+                                    }
+                                    
+                                    let check = self.peek();
+                                    match check {
+                                        Some(ch) if ch.is_digit(8) => (),
+                                        _ => return Err(SyntaxError::new(line, column, String::from("Expecting digit after '_' in octet number!")))
+                                    }
+                                    
+                                    while let Some(ch) = self.peek() {
+                                        match ch {
+                                            '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' => {
+                                                text.push(self.advance().unwrap());
+                                            },
+                                            _ => break
+                                        }
+                                    }
+
+                                    if self.peek() != Some('_') { break; }
+                                }
                             },
                             Some('b') | Some('B') => {
                                 text.push(self.advance().unwrap());
@@ -2957,7 +2981,7 @@ mod lexical_analyzer_tests {
     }
 
     #[test]
-    fn test_empty_tripple_double_quote_string_token() {
+    fn test_empty_triple_double_quote_string_token() {
         let symbols = PythonCoreLexer::new("\"\"\"\"\"\"").tokenize_source();
 
         let expected: Vec<Token> = vec![
@@ -2977,7 +3001,7 @@ mod lexical_analyzer_tests {
     }
 
     #[test]
-    fn test_empty_tripple_single_quote_string_token() {
+    fn test_empty_triple_single_quote_string_token() {
         let symbols = PythonCoreLexer::new("''''''").tokenize_source();
 
         let expected: Vec<Token> = vec![
@@ -2997,7 +3021,7 @@ mod lexical_analyzer_tests {
     }
 
     #[test]
-    fn test_tripple_double_quote_string_token() {
+    fn test_triple_double_quote_string_token() {
         let symbols = PythonCoreLexer::new("\"\"\"Hello, World!\"\"\"").tokenize_source();
 
         let expected: Vec<Token> = vec![
@@ -3017,7 +3041,7 @@ mod lexical_analyzer_tests {
     }
 
     #[test]
-    fn test_tripple_single_quote_string_token() {
+    fn test_triple_single_quote_string_token() {
         let symbols = PythonCoreLexer::new("'''Hello, World!'''").tokenize_source();
 
         let expected: Vec<Token> = vec![
@@ -3281,6 +3305,107 @@ mod lexical_analyzer_tests {
             Err(e) => {
                 assert_eq!(1, e.line);
                 assert_eq!(4, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+
+
+
+
+
+    #[test]
+    fn test_octet_number_1_token() {
+        let symbols = PythonCoreLexer::new("0o071").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0o071")),
+            Token::EOF(1, 6)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_octet_number_2_token() {
+        let symbols = PythonCoreLexer::new("0O167").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0O167")),
+            Token::EOF(1, 6)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_octet_number_3_token() {
+        let symbols = PythonCoreLexer::new("0o_17_6_3").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0o_17_6_3")),
+            Token::EOF(1, 10)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_octet_number_error_1_token() {
+        let symbols = PythonCoreLexer::new("0o0_").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in octet number!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_octet_number_error_2_token() {
+        let symbols = PythonCoreLexer::new("0o_8").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in octet number!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
                 assert_eq!(expected.message, e.message)
             }
         }
