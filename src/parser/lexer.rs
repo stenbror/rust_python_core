@@ -299,7 +299,60 @@ impl PythonCoreLexer {
         };
         
         /* Handle main number loop */
-       
+        match dotted_number{
+            true => {
+                
+            },
+            _ => {
+                match self.peek() {
+                    Some('0') => {
+                        text.push('0');
+                        self.advance();
+                        match self.peek() {
+                            Some('x') | Some('X') => {
+                                
+                            },
+                            Some('o') | Some('O') => {
+                                
+                            },
+                            Some('b') | Some('B') => {
+                                text.push(self.advance().unwrap());
+
+                                while true {
+                                    if self.peek() == Some('_') {
+                                        text.push('_');
+                                        self.advance();
+                                    }
+                                    
+                                    if self.peek() != Some('0') && self.peek() != Some('1') { return Err(SyntaxError::new(self.line, self.column, String::from("Expecting '0' or '1' in binary number!"))); }
+                                    
+                                    while let Some(ch) = self.peek() {
+                                        match ch {
+                                            '0' | '1' => {
+                                                text.push(self.advance().unwrap());
+                                            },
+                                            _ => break
+                                        }
+                                    }
+                                    
+                                    if self.peek() != Some('_') { break; }
+                                }
+                            },
+                            _ => {
+                                
+                            }
+                        }
+                        
+                        
+                        
+                        
+                    },
+                    _ => {
+
+                    }
+                }
+            }
+        }
         
         Ok(Token::Number(line, column, text))
     }
@@ -3132,6 +3185,102 @@ mod lexical_analyzer_tests {
             Err(e) => {
                 assert_eq!(1, e.line);
                 assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_binary_number_1_token() {
+        let symbols = PythonCoreLexer::new("0b1101").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0b1101")),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_binary_number_2_token() {
+        let symbols = PythonCoreLexer::new("0B1101").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0B1101")),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_binary_number_3_token() {
+        let symbols = PythonCoreLexer::new("0b_11_0_1").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0b_11_0_1")),
+            Token::EOF(1, 10)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_binary_number_error_1_token() {
+        let symbols = PythonCoreLexer::new("0b_").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Expecting '0' or '1' in binary number!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(4, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_binary_number_error_2_token() {
+        let symbols = PythonCoreLexer::new("0b_7").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Expecting '0' or '1' in binary number!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(4, e.column);
                 assert_eq!(expected.message, e.message)
             }
         }
