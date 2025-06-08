@@ -1,3 +1,5 @@
+use crate::parser::errors::SyntaxError;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token
 {
@@ -92,21 +94,6 @@ pub enum Token
     Number(usize, usize, String),
     String(usize, usize, String)
 }
-
-
-pub struct SyntaxError {
-    line: usize,
-    column: usize,
-    message: String
-}
-
-impl SyntaxError {
-    pub fn new(line: usize, column: usize, message: String) -> Self {
-        SyntaxError { line: line, column: column, message: message }
-    }
-}
-
-
 
 struct PythonCoreLexer {
     buffer: Vec<char>,
