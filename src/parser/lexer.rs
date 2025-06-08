@@ -164,6 +164,12 @@ impl PythonCoreLexer {
             _ => false
         }
     }
+    
+    fn handle_numbers(&mut self, prefix_dot: Option<char>, line: usize, column: usize) -> Result<Token, SyntaxError> {
+        let mut text = String::new();
+        
+        Ok(Token::Number(line, column, text))
+    }
 
     fn handle_strings(&mut self, prefix: Option<String>, ch: char, start_line: usize, start_column: usize) -> Result<Token, SyntaxError> {
         let mut text = String::new();
@@ -395,23 +401,21 @@ impl PythonCoreLexer {
                 },
                 '0'..='9' | '.' => {
                     let pos = self.column;
-                    let mut dot_seen = false;
-                    let mut text = String::new();
-
+                    
                     if (ch == '.') {
-                        text.push(ch);
-                        dot_seen = true;
                         self.advance();
 
                         match self.peek() {
-                            Some('0'..='9') => {},
+                            Some('0'..='9') => {
+                                nodes.push(self.handle_numbers(Some('.'), self.line, pos)?);
+                            },
                             _ => {
                                 nodes.push(Token::Period(self.line, pos));
-                                continue;
                             }
                         }
+                        continue
                     }
-                    todo!()
+                    nodes.push(self.handle_numbers(None, self.line, pos)?);
                 }
                 '(' => {
                     self.advance();
