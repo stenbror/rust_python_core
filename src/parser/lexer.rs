@@ -222,6 +222,11 @@ impl PythonCoreLexer {
                     text.push(ch4);
                     self.advance();
                     
+                    if !is_tripple {
+                        complete = true;
+                        break
+                    }
+                    
                     match self.peek() {
                         Some('\'') if is_tripple => {
                             text.push('\'');
@@ -246,6 +251,11 @@ impl PythonCoreLexer {
                 '"' if ch4 == ch => {
                     text.push(ch4);
                     self.advance();
+
+                    if !is_tripple {
+                        complete = true;
+                        break
+                    }
 
                     match self.peek() {
                         Some('"') if is_tripple => {
@@ -2868,6 +2878,48 @@ mod lexical_analyzer_tests {
         match symbols {
             Ok(x) => {
                 assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_multiple_string_single_quote_token() {
+        let symbols = PythonCoreLexer::new("'Hello, World!''Test'").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("'Hello, World!'")),
+            Token::String(1, 16, String::from("'Test'")),
+            Token::EOF(1, 22)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_multiple_string_double_quote_token() {
+        let symbols = PythonCoreLexer::new("\"Hello, World!\"\"Test\"").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::String(1, 1, String::from("\"Hello, World!\"")),
+            Token::String(1, 16, String::from("\"Test\"")),
+            Token::EOF(1, 22)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
                 assert_eq!(expected, x);
             },
             Err(e) => {
