@@ -664,7 +664,7 @@ impl PythonCoreLexer {
 
 #[cfg(test)]
 mod lexical_analyzer_tests {
-    use crate::parser::lexer::{PythonCoreLexer, Token};
+    use crate::parser::lexer::{PythonCoreLexer, SyntaxError, Token};
 
     #[test]
     fn test_parenthesis() {
@@ -2928,6 +2928,78 @@ mod lexical_analyzer_tests {
             },
             Err(e) => {
                 assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_unterminated_double_quote_string_token() {
+        let symbols = PythonCoreLexer::new("\"Hello, World!").tokenize_source();
+        
+        let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
+        
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_unterminated_single_quote_string_token() {
+        let symbols = PythonCoreLexer::new("'Hello, World!").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_unterminated_triple_double_quote_string_token() {
+        let symbols = PythonCoreLexer::new("\"\"\"Hello, World!").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_unterminated_triple_single_quote_string_token() {
+        let symbols = PythonCoreLexer::new("'''Hello, World!").tokenize_source();
+
+        let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(1, e.line);
+                assert_eq!(1, e.column);
+                assert_eq!(expected.message, e.message)
             }
         }
     }
