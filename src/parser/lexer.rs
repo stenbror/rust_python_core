@@ -1,99 +1,5 @@
 use crate::parser::errors::SyntaxError;
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum Token
-{
-    EOF(usize, usize),
-    Indent(usize, usize),
-    Dedent(usize, usize),
-    Newline(usize, usize),
-    False(usize, usize),
-    None(usize, usize),
-    True(usize, usize),
-    And(usize, usize),
-    As(usize, usize),
-    Assert(usize, usize),
-    Async(usize, usize),
-    Await(usize, usize),
-    Break(usize, usize),
-    Class(usize, usize),
-    Continue(usize, usize),
-    Def(usize, usize),
-    Del(usize, usize),
-    Elif(usize, usize),
-    Else(usize, usize),
-    Except(usize, usize),
-    Finally(usize, usize),
-    For(usize, usize),
-    From(usize, usize),
-    Global(usize, usize),
-    If(usize, usize),
-    Import(usize, usize),
-    In(usize, usize),
-    Is(usize, usize),
-    Lambda(usize, usize),
-    Nonlocal(usize, usize),
-    Not(usize, usize),
-    Or(usize, usize),
-    Pass(usize, usize),
-    Raise(usize, usize),
-    Return(usize, usize),
-    Try(usize, usize),
-    While(usize, usize),
-    With(usize, usize),
-    Yield(usize, usize),
-    Plus(usize, usize),
-    Minus(usize, usize),
-    Star(usize, usize),
-    Power(usize, usize),
-    Slash(usize, usize),
-    SlashSlash(usize, usize),
-    Modulo(usize, usize),
-    Decorator(usize, usize),
-    ShiftLeft(usize, usize),
-    ShiftRight(usize, usize),
-    BitwiseAnd(usize, usize),
-    BitwiseOr(usize, usize),
-    BitwiseXor(usize, usize),
-    BitwiseInvert(usize, usize),
-    ColonEqual(usize, usize),
-    Less(usize, usize),
-    Greater(usize, usize),
-    LessEqual(usize, usize),
-    GreaterEqual(usize, usize),
-    Equal(usize, usize),
-    NotEqual(usize, usize),
-    Bang(usize, usize),
-    LeftParen(usize, usize),
-    RightParen(usize, usize),
-    LeftBracket(usize, usize),
-    RightBracket(usize, usize),
-    LeftCurly(usize, usize),
-    RightCurly(usize, usize),
-    Comma(usize, usize),
-    Colon(usize, usize),
-    BitwiseNot(usize, usize),
-    Period(usize, usize),
-    Semicolon(usize, usize),
-    Assign(usize, usize),
-    Arrow(usize, usize),
-    PlusAssign(usize, usize),
-    MinusAssign(usize, usize),
-    StarAssign(usize, usize),
-    SlashAssign(usize, usize),
-    SlashSlashAssign(usize, usize),
-    ModuloAssign(usize, usize),
-    DecoratorAssign(usize, usize),
-    BitwiseAndAssign(usize, usize),
-    BitwiseOrAssign(usize, usize),
-    BitwiseXorAssign(usize, usize),
-    ShiftLeftAssign(usize, usize),
-    ShiftRightAssign(usize, usize),
-    PowerAssign(usize, usize),
-    Name(usize, usize, String),
-    Number(usize, usize, String),
-    String(usize, usize, String)
-}
+use crate::parser::tokens::Token;
 
 struct PythonCoreLexer {
     buffer: Vec<char>,
@@ -151,7 +57,7 @@ impl PythonCoreLexer {
             _ => false
         }
     }
-    
+
     fn handle_numbers(&mut self, prefix_dot: Option<char>, line: usize, column: usize) -> Result<Token, SyntaxError> {
         let mut text = String::new();
         let dotted_number = match prefix_dot {
@@ -161,9 +67,9 @@ impl PythonCoreLexer {
             },
             _ => false
         };
-        
+
         let is_hex_digit = |ch: char| -> bool { ch.is_ascii_hexdigit()};
-        
+
         let fraction = | mut text: String| -> Result<(), SyntaxError> {
             match dotted_number {
                 false => text.push('.'),
@@ -178,7 +84,7 @@ impl PythonCoreLexer {
                     text.push(ch);
                     self.advance();
 
-                    while true {
+                    loop {
                         while let Some(ch) = self.peek() {
                             match ch {
                                 '0'..='9' => {
@@ -206,7 +112,7 @@ impl PythonCoreLexer {
                 },
                 _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
             }
-            
+
             Ok(())
         };
 
@@ -222,7 +128,7 @@ impl PythonCoreLexer {
                 },
                 _ => return Ok(())
             }
-            
+
             match self.peek() {
                 Some('+') => {
                     self.advance();
@@ -234,14 +140,14 @@ impl PythonCoreLexer {
                 },
                 _ => ()
             }
-            
+
             let check = self.peek();
             match check {
                 Some(ch) if ch >= '0' && ch <= '9' => {
                     text.push(ch);
                     self.advance();
-                    
-                    while true {
+
+                    loop {
                         while let Some(ch) = self.peek() {
                             match ch {
                                 '0'..='9' => {
@@ -251,7 +157,7 @@ impl PythonCoreLexer {
                                 _ => break
                             }
                         }
-                        
+
                         match self.peek() {
                             Some('_') => {
                                 text.push('_');
@@ -259,17 +165,17 @@ impl PythonCoreLexer {
                             },
                             _ => break
                         }
-                        
+
                         match self.peek() {
                             Some(ch) if ch >= '0' && ch <= '9' => (),
                             _ => return Err(SyntaxError::new(line, column, String::from("Invalid number")))
                         }
-                        
+
                     }
                 },
                 _ => return Err(SyntaxError::new(line, column, String::from("Invalid number literal in exponent part!")))
             }
-            
+
             Ok(())
         };
 
@@ -286,7 +192,7 @@ impl PythonCoreLexer {
                 _ => ()
             }
         };
-        
+
         /* Handle main number loop */
         match dotted_number{
             true => {
@@ -301,7 +207,7 @@ impl PythonCoreLexer {
                             Some('x') | Some('X') => {
                                 text.push(self.advance().unwrap());
 
-                                while true {
+                                loop {
                                     if self.peek() == Some('_') {
                                         text.push('_');
                                         self.advance();
@@ -328,18 +234,18 @@ impl PythonCoreLexer {
                             Some('o') | Some('O') => {
                                 text.push(self.advance().unwrap());
 
-                                while true {
+                                loop {
                                     if self.peek() == Some('_') {
                                         text.push('_');
                                         self.advance();
                                     }
-                                    
+
                                     let check = self.peek();
                                     match check {
                                         Some(ch) if ch.is_digit(8) => (),
                                         _ => return Err(SyntaxError::new(line, column, String::from("Expecting digit after '_' in octet number!")))
                                     }
-                                    
+
                                     while let Some(ch) = self.peek() {
                                         match ch {
                                             '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' => {
@@ -355,14 +261,14 @@ impl PythonCoreLexer {
                             Some('b') | Some('B') => {
                                 text.push(self.advance().unwrap());
 
-                                while true {
+                                loop {
                                     if self.peek() == Some('_') {
                                         text.push('_');
                                         self.advance();
                                     }
-                                    
+
                                     if self.peek() != Some('0') && self.peek() != Some('1') { return Err(SyntaxError::new(self.line, self.column, String::from("Expecting '0' or '1' in binary number!"))); }
-                                    
+
                                     while let Some(ch) = self.peek() {
                                         match ch {
                                             '0' | '1' => {
@@ -371,7 +277,7 @@ impl PythonCoreLexer {
                                             _ => break
                                         }
                                     }
-                                    
+
                                     if self.peek() != Some('_') { break; }
                                 }
                             },
@@ -386,7 +292,7 @@ impl PythonCoreLexer {
                 }
             }
         }
-        
+
         Ok(Token::Number(line, column, text))
     }
 
@@ -446,17 +352,17 @@ impl PythonCoreLexer {
                 '\'' if ch4 == ch  => {
                     text.push(ch4);
                     self.advance();
-                    
+
                     if !is_tripple {
                         complete = true;
                         break
                     }
-                    
+
                     match self.peek() {
                         Some('\'') if is_tripple => {
                             text.push('\'');
                             self.advance();
-                            
+
                             match self.peek() {
                                 Some('\'') if is_tripple => {
                                     text.push('\'');
@@ -620,7 +526,7 @@ impl PythonCoreLexer {
                 },
                 '0'..='9' | '.' => {
                     let pos = self.column;
-                    
+
                     if (ch == '.') {
                         self.advance();
 
@@ -3154,9 +3060,9 @@ mod lexical_analyzer_tests {
     #[test]
     fn test_unterminated_double_quote_string_token() {
         let symbols = PythonCoreLexer::new("\"Hello, World!").tokenize_source();
-        
+
         let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
-        
+
         match symbols {
             Ok(x) => {
                 assert!(false);
@@ -3318,7 +3224,7 @@ mod lexical_analyzer_tests {
             }
         }
     }
-    
+
     #[test]
     fn test_octet_number_1_token() {
         let symbols = PythonCoreLexer::new("0o071").tokenize_source();
@@ -3414,7 +3320,7 @@ mod lexical_analyzer_tests {
             }
         }
     }
-    
+
     #[test]
     fn test_hex_number_1_token() {
         let symbols = PythonCoreLexer::new("0x7f").tokenize_source();
