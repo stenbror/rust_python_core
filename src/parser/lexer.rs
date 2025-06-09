@@ -542,6 +542,31 @@ impl PythonCoreLexer {
                     self.advance();
                     continue
                 },
+                '\\' => {
+                    self.advance();
+                    match self.peek() {
+                        Some('\r') => {
+                            self.advance();
+                            match self.peek() {
+                                Some('\n') => {
+                                    self.advance();
+                                },
+                                _ => ()
+                            }
+                            self.line += 1;
+                            self.column = 1;
+                        },
+                        Some('\n') => {
+                            self.advance();
+                            self.line += 1;
+                            self.column = 1;
+                        },
+                        _ => {
+                            return Err(SyntaxError::new(self.line, self.column, String::from("Line continuation not followed by newline")));
+                        }
+                    }
+                    continue
+                },
                 '\t' => {
                     self.advance();
                     continue
@@ -3867,6 +3892,84 @@ mod lexical_analyzer_tests {
             },
             Err(_) => {
                 assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_line_continuation_newline_1_token() {
+        let symbols = PythonCoreLexer::new("\\\r\npass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Pass(2, 1),
+            Token::EOF(2, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_line_continuation_newline_2_token() {
+        let symbols = PythonCoreLexer::new("\\\rpass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Pass(2, 1),
+            Token::EOF(2, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_line_continuation_newline_3_token() {
+        let symbols = PythonCoreLexer::new("\\\npass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Pass(2, 1),
+            Token::EOF(2, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_line_continuation_without_newline_token() {
+        let symbols = PythonCoreLexer::new("\\pass").tokenize_source();
+
+        let expected = SyntaxError::new(1, 2, String::from("Line continuation not followed by newline"));
+
+        match symbols {
+            Ok(_) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(expected.line, e.line);
+                assert_eq!(expected.column, e.column);
+                assert_eq!(expected.message, e.message)
             }
         }
     }
