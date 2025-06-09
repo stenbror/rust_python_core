@@ -302,7 +302,41 @@ impl PythonCoreLexer {
                                 }
                             },
                             _ => {
-                                todo!()
+                                match self.peek() {
+                                    Some('.') => {
+                                        text.push_str(self.handle_fraction(dotted_number)?.as_str());
+
+                                        if self.peek() == Some('e') || self.peek() == Some('E') {
+                                            text.push_str(self.handle_exponent()?.as_str());
+                                        }
+
+                                        match self.handle_imaginary() {
+                                            Some(text2) => text.push_str(&text2),
+                                            _ => ()
+                                        }
+                                    },
+                                    Some('e') | Some('E') => {
+                                        if self.peek() == Some('e') || self.peek() == Some('E') {
+                                            text.push_str(self.handle_exponent()?.as_str());
+                                        }
+
+                                        match self.handle_imaginary() {
+                                            Some(text2) => text.push_str(&text2),
+                                            _ => ()
+                                        }
+                                    },
+                                    Some('j') | Some('J') => {
+                                        match self.handle_imaginary() {
+                                            Some(text2) => text.push_str(&text2),
+                                            _ => ()
+                                        }
+                                    },
+                                    Some(ch) if ch.is_digit(8) => {
+                                        return Err(SyntaxError::new(self.line, self.column, String::from("Old style octet staring with zero is not allowed!")))
+                                    },
+                                    _ => ()
+                                }
+                                
                             }
                         }
                     },
@@ -3613,6 +3647,104 @@ mod lexical_analyzer_tests {
             },
             Err(e) => {
                 assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_zero_number_token() {
+        let symbols = PythonCoreLexer::new("0").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0")),
+            Token::EOF(1, 2)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_zero_dot_zero_number_token() {
+        let symbols = PythonCoreLexer::new("0.0").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0.0")),
+            Token::EOF(1, 4)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_zero_dot_number_with_exponent_token() {
+        let symbols = PythonCoreLexer::new("0.134e-34").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0.134e-34")),
+            Token::EOF(1, 10)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_zero_dot_number_with_exponent_and_j_token() {
+        let symbols = PythonCoreLexer::new("0.134e-34J").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0.134e-34J")),
+            Token::EOF(1, 11)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_zero_number_error_token() {
+        let symbols = PythonCoreLexer::new("07").tokenize_source();
+
+        let expected = SyntaxError::new(1, 2, String::from("Old style octet staring with zero is not allowed!"));
+
+        match symbols {
+            Ok(x) => {
+                assert!(false);
+            },
+            Err(e) => {
+                assert_eq!(expected.line, e.line);
+                assert_eq!(expected.column, e.column);
+                assert_eq!(expected.message, e.message)
             }
         }
     }
