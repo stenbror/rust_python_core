@@ -1,7 +1,7 @@
 use crate::parser::errors::SyntaxError;
 use crate::parser::tokens::Token;
 
-struct PythonCoreLexer {
+pub struct PythonCoreLexer {
     buffer: Vec<char>,
     position: usize,
     line: usize,
@@ -533,7 +533,7 @@ impl PythonCoreLexer {
 
 
 
-    fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
+    pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
 
         while let Some(ch) = self.peek() {
