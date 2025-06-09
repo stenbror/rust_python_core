@@ -159,7 +159,7 @@ impl PythonCoreLexer {
         }
 
         match self.peek() {
-            Some(ch) => {
+            Some(_) => {
                 loop {
                     while let Some(ch) = self.peek() {
                         match ch {
@@ -195,7 +195,7 @@ impl PythonCoreLexer {
     fn handle_numbers(&mut self, prefix_dot: Option<char>, line: usize, column: usize) -> Result<Token, SyntaxError> {
         let mut text = String::new();
         let dotted_number = match prefix_dot {
-            Some(ch) => {
+            Some(_) => {
                 text.push('.');
                 true
             },
@@ -341,7 +341,7 @@ impl PythonCoreLexer {
                     },
                     _ => {
                         match self.peek() {
-                            Some(ch) => {
+                            Some(_) => {
                                 loop {
                                     while let Some(ch) = self.peek() {
                                         match ch {
@@ -623,7 +623,7 @@ impl PythonCoreLexer {
                 '0'..='9' | '.' => {
                     let pos = self.column;
 
-                    if (ch == '.') {
+                    if ch == '.' {
                         self.advance();
 
                         match self.peek() {
