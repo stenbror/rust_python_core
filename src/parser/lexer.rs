@@ -919,7 +919,7 @@ mod lexical_analyzer_tests {
         let symbols = PythonCoreLexer::new("[)").tokenize_source();
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false)
             },
             Err(e) => {
@@ -3160,7 +3160,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3178,7 +3178,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3196,7 +3196,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3214,7 +3214,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Unterminated string"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3292,7 +3292,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Expecting '0' or '1' in binary number!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3310,7 +3310,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Expecting '0' or '1' in binary number!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3388,7 +3388,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in octet number!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3406,7 +3406,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in octet number!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3484,7 +3484,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in hexadecimal number!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3502,7 +3502,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 1, String::from("Expecting digit after '_' in hexadecimal number!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3634,7 +3634,7 @@ mod lexical_analyzer_tests {
     }
 
     #[test]
-    fn test_dot_number_with_exponent_plus__underscore_token() {
+    fn test_dot_number_with_exponent_plus_underscore_token() {
         let symbols = PythonCoreLexer::new(".1_0E+4").tokenize_source();
 
         let expected: Vec<Token> = vec![
@@ -3780,7 +3780,7 @@ mod lexical_analyzer_tests {
         let expected = SyntaxError::new(1, 2, String::from("Old style octet staring with zero is not allowed!"));
 
         match symbols {
-            Ok(x) => {
+            Ok(_) => {
                 assert!(false);
             },
             Err(e) => {
@@ -3832,7 +3832,7 @@ mod lexical_analyzer_tests {
     }
 
     #[test]
-    fn test_number_integer_imaginary__token() {
+    fn test_number_integer_imaginary_token() {
         let symbols = PythonCoreLexer::new("1000J").tokenize_source();
 
         let expected: Vec<Token> = vec![
