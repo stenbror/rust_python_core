@@ -535,12 +535,41 @@ impl PythonCoreLexer {
 
     pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
+        let mut is_blank_line = false;
+        let mut at_bol = false;
 
         while let Some(ch) = self.peek() {
             match ch {
                 ' ' => {
                     self.advance();
                     continue
+                },
+                '\r' => {
+                    self.advance();
+                    match self.peek() {
+                        Some('\n') => {
+                            self.advance();
+                        },
+                        _ => ()
+                    }
+                    
+                    self.line += 1;
+                    self.column = 1;
+
+                    if is_blank_line ||self.parenthesis_stack.len() > 0 {
+                        continue // Fix
+                    }
+                    nodes.push(Token::Newline(self.line, self.column));
+                },
+                '\n' => {
+                    self.advance();
+                    self.line += 1;
+                    self.column = 1;
+                    
+                    if is_blank_line ||self.parenthesis_stack.len() > 0 {
+                        continue // Fix
+                    }
+                    nodes.push(Token::Newline(self.line, self.column));
                 },
                 '\\' => {
                     self.advance();
@@ -3970,6 +3999,91 @@ mod lexical_analyzer_tests {
                 assert_eq!(expected.line, e.line);
                 assert_eq!(expected.column, e.column);
                 assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_newline_r_token() {
+        let symbols = PythonCoreLexer::new("\rpass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Newline(2, 1),
+            Token::Pass(2, 1),
+            Token::EOF(2, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_newline_n_token() {
+        let symbols = PythonCoreLexer::new("\npass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Newline(2, 1),
+            Token::Pass(2, 1),
+            Token::EOF(2, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_newline_rn_token() {
+        let symbols = PythonCoreLexer::new("\r\npass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Newline(2, 1),
+            Token::Pass(2, 1),
+            Token::EOF(2, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_newline_double_rn_token() {
+        let symbols = PythonCoreLexer::new("\r\n\r\npass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Newline(2, 1),
+            Token::Newline(3, 1),
+            Token::Pass(3, 1),
+            Token::EOF(3, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(4, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
             }
         }
     }
