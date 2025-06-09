@@ -341,7 +341,50 @@ impl PythonCoreLexer {
                         }
                     },
                     _ => {
-                        todo!()
+                        match self.peek() {
+                            Some(ch) => {
+                                loop {
+                                    while let Some(ch) = self.peek() {
+                                        match ch {
+                                            '0'..='9' => {
+                                                text.push(ch);
+                                                self.advance();
+                                            },
+                                            _ => break
+                                        }
+                                    }
+
+                                    match self.peek() {
+                                        Some('_') => {
+                                            text.push('_');
+                                            self.advance();
+                                        },
+                                        _ => break
+                                    }
+
+                                    match self.peek() {
+                                        Some(ch) if ch >= '0' && ch <= '9' => (),
+                                        _ => return Err(SyntaxError::new(self.line, self.column, String::from("Invalid number")))
+                                    }
+
+                                }
+                            },
+                            None => ()
+                        }
+                        
+                        match self.peek() {
+                            Some('.') => text.push_str(self.handle_fraction(dotted_number)?.as_str()),
+                            _ => ()
+                        }
+                        
+                        if self.peek() == Some('e') || self.peek() == Some('E') {
+                            text.push_str(self.handle_exponent()?.as_str());
+                        }
+
+                        match self.handle_imaginary() {
+                            Some(text2) => text.push_str(&text2),
+                            _ => ()
+                        }
                     }
                 }
             }
@@ -3745,6 +3788,86 @@ mod lexical_analyzer_tests {
                 assert_eq!(expected.line, e.line);
                 assert_eq!(expected.column, e.column);
                 assert_eq!(expected.message, e.message)
+            }
+        }
+    }
+
+    #[test]
+    fn test_number_zero_j_token() {
+        let symbols = PythonCoreLexer::new("0j").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("0j")),
+            Token::EOF(1, 3)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_number_integer_token() {
+        let symbols = PythonCoreLexer::new("1000").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("1000")),
+            Token::EOF(1, 5)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_number_integer_imaginary__token() {
+        let symbols = PythonCoreLexer::new("1000J").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("1000J")),
+            Token::EOF(1, 6)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_number_integer_exp_token() {
+        let symbols = PythonCoreLexer::new("1.0E34").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from("1.0E34")),
+            Token::EOF(1, 7)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
             }
         }
     }
