@@ -143,7 +143,7 @@ impl PythonCoreLexer {
                 self.advance();
             }
         }
-        
+
         let check = self.peek();
         match check {
             Some(ch) => {
@@ -157,7 +157,7 @@ impl PythonCoreLexer {
             },
             _ => {}
         }
-        
+
         match self.peek() {
             Some(ch) => {
                 loop {
@@ -203,12 +203,12 @@ impl PythonCoreLexer {
         };
 
         let is_hex_digit = |ch: char| -> bool { ch.is_ascii_hexdigit()};
-        
+
         /* Handle main number loop */
         match dotted_number{
             true => {
                 text.push_str(self.handle_fraction(dotted_number)?.as_str());
-                
+
                 if self.peek() == Some('e') || self.peek() == Some('E') {
                     text.push_str(self.handle_exponent()?.as_str());
                 }
@@ -336,7 +336,6 @@ impl PythonCoreLexer {
                                     },
                                     _ => ()
                                 }
-                                
                             }
                         }
                     },
@@ -371,12 +370,12 @@ impl PythonCoreLexer {
                             },
                             None => ()
                         }
-                        
+
                         match self.peek() {
                             Some('.') => text.push_str(self.handle_fraction(dotted_number)?.as_str()),
                             _ => ()
                         }
-                        
+
                         if self.peek() == Some('e') || self.peek() == Some('E') {
                             text.push_str(self.handle_exponent()?.as_str());
                         }
@@ -909,7 +908,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(9, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -945,7 +944,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -965,7 +964,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -985,7 +984,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1005,7 +1004,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1025,7 +1024,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1045,7 +1044,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1065,7 +1064,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1085,7 +1084,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1105,7 +1104,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1125,7 +1124,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1145,7 +1144,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1165,7 +1164,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1185,7 +1184,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1205,7 +1204,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1225,7 +1224,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1245,7 +1244,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1265,7 +1264,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1285,7 +1284,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1305,7 +1304,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1325,7 +1324,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1345,7 +1344,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1365,7 +1364,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1385,7 +1384,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1405,7 +1404,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1425,7 +1424,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1445,7 +1444,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1465,7 +1464,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1485,7 +1484,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1505,7 +1504,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1525,7 +1524,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1545,7 +1544,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1565,7 +1564,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1585,7 +1584,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1605,7 +1604,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1625,7 +1624,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1645,7 +1644,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1665,7 +1664,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1685,7 +1684,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1705,7 +1704,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1725,7 +1724,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1745,7 +1744,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1765,7 +1764,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1785,7 +1784,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1805,7 +1804,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1825,7 +1824,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1845,7 +1844,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1865,7 +1864,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1885,7 +1884,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1905,7 +1904,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1925,7 +1924,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1945,7 +1944,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1965,7 +1964,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -1985,7 +1984,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2005,7 +2004,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2025,7 +2024,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2045,7 +2044,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2065,7 +2064,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2085,7 +2084,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2105,7 +2104,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2125,7 +2124,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2145,7 +2144,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2165,7 +2164,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2185,7 +2184,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2205,7 +2204,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2225,7 +2224,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2245,7 +2244,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2265,7 +2264,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2285,7 +2284,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2305,7 +2304,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2325,7 +2324,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2345,7 +2344,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2365,7 +2364,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2385,7 +2384,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2405,7 +2404,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2425,7 +2424,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2445,7 +2444,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2466,7 +2465,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(3, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2486,7 +2485,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2506,7 +2505,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2526,7 +2525,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2546,7 +2545,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2566,7 +2565,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2586,7 +2585,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2606,7 +2605,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2626,7 +2625,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2646,7 +2645,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2666,7 +2665,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2686,7 +2685,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2706,7 +2705,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2726,7 +2725,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2746,7 +2745,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2766,7 +2765,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2786,7 +2785,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2806,7 +2805,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2826,7 +2825,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2846,7 +2845,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2866,7 +2865,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2886,7 +2885,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2906,7 +2905,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2926,7 +2925,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2946,7 +2945,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2966,7 +2965,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -2986,7 +2985,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3006,7 +3005,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3026,7 +3025,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3046,7 +3045,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3066,7 +3065,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3086,7 +3085,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3106,7 +3105,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3127,7 +3126,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(3, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3148,7 +3147,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(3, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3240,7 +3239,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3260,7 +3259,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3280,7 +3279,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3336,7 +3335,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3356,7 +3355,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3376,7 +3375,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3432,7 +3431,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3452,7 +3451,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3472,7 +3471,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3528,7 +3527,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3548,7 +3547,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3568,7 +3567,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3588,7 +3587,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3608,7 +3607,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3628,7 +3627,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3648,7 +3647,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3668,7 +3667,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3688,7 +3687,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3708,7 +3707,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3728,7 +3727,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3748,7 +3747,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3768,7 +3767,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3806,7 +3805,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3826,7 +3825,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3846,7 +3845,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
@@ -3866,7 +3865,7 @@ mod lexical_analyzer_tests {
                 assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
-            Err(e) => {
+            Err(_) => {
                 assert!(false)
             }
         }
