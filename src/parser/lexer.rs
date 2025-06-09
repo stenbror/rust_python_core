@@ -3516,4 +3516,104 @@ mod lexical_analyzer_tests {
             }
         }
     }
+
+    #[test]
+    fn test_dot_number_with_exponent_underscore_token() {
+        let symbols = PythonCoreLexer::new(".1_0e-4").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1_0e-4")),
+            Token::EOF(1, 8)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_with_exponent_with_j_underscore_token() {
+        let symbols = PythonCoreLexer::new(".1_0e-4J").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1_0e-4J")),
+            Token::EOF(1, 9)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_with_exponent_plus__underscore_token() {
+        let symbols = PythonCoreLexer::new(".1_0E+4").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1_0E+4")),
+            Token::EOF(1, 8)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_with_exponent_with_plus_j_underscore_token() {
+        let symbols = PythonCoreLexer::new(".1_0E+4J").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1_0E+4J")),
+            Token::EOF(1, 9)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_dot_number_with_exponent_with_underscore_token() {
+        let symbols = PythonCoreLexer::new(".1_0E45").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Number(1, 1, String::from(".1_0E45")),
+            Token::EOF(1, 8)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(e) => {
+                assert!(false)
+            }
+        }
+    }
 }
