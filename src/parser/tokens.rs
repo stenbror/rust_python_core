@@ -61,7 +61,6 @@ pub enum Token
     GreaterEqual(usize, usize),
     Equal(usize, usize),
     NotEqual(usize, usize),
-    Bang(usize, usize),
     LeftParen(usize, usize),
     RightParen(usize, usize),
     LeftBracket(usize, usize),

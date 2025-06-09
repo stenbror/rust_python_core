@@ -820,7 +820,7 @@ impl PythonCoreLexer {
                         self.advance();
                         nodes.push(Token::NotEqual(self.line, self.column - 2))
                     } else {
-                        nodes.push(Token::Bang(self.line, self.column - 1))
+                        nodes.push(Token::BitwiseNot(self.line, self.column - 1))
                     }
                 },
                 ':' => {
@@ -1475,7 +1475,7 @@ mod lexical_analyzer_tests {
         let symbols = PythonCoreLexer::new("!").tokenize_source();
 
         let expected: Vec<Token> = vec![
-            Token::Bang(1, 1),
+            Token::BitwiseNot(1, 1),
             Token::EOF(1, 2)
         ];
 
