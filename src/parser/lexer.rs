@@ -538,397 +538,401 @@ impl PythonCoreLexer {
         let mut is_blank_line = false;
         let mut at_bol = false;
 
-        while let Some(ch) = self.peek() {
-            match ch {
-                ' ' => {
-                    self.advance();
-                    continue
-                },
-                '\r' => {
-                    self.advance();
-                    match self.peek() {
-                        Some('\n') => {
-                            self.advance();
-                        },
-                        _ => ()
-                    }
-                    
-                    self.line += 1;
-                    self.column = 1;
-
-                    if is_blank_line ||self.parenthesis_stack.len() > 0 {
-                        continue // Fix
-                    }
-                    nodes.push(Token::Newline(self.line, self.column));
-                },
-                '\n' => {
-                    self.advance();
-                    self.line += 1;
-                    self.column = 1;
-                    
-                    if is_blank_line ||self.parenthesis_stack.len() > 0 {
-                        continue // Fix
-                    }
-                    nodes.push(Token::Newline(self.line, self.column));
-                },
-                '\\' => {
-                    self.advance();
-                    match self.peek() {
-                        Some('\r') => {
-                            self.advance();
-                            match self.peek() {
-                                Some('\n') => {
-                                    self.advance();
-                                },
-                                _ => ()
-                            }
-                            self.line += 1;
-                            self.column = 1;
-                        },
-                        Some('\n') => {
-                            self.advance();
-                            self.line += 1;
-                            self.column = 1;
-                        },
-                        _ => {
-                            return Err(SyntaxError::new(self.line, self.column, String::from("Line continuation not followed by newline")));
-                        }
-                    }
-                    continue
-                },
-                '\t' => {
-                    self.advance();
-                    continue
-                },
-                '\'' | '"' => {
-                    nodes.push(self.handle_strings(None, ch, self.line, self.column)?);
-                    continue;
-                },
-                ch if self.is_identifier_start(ch) => {
-                    let pos = self.column;
-                    let mut text = String::new();
-
-                    while let Some(ch) = self.peek() {
-                        if self.is_identifier_char(ch) {
-                            text.push(ch);
-                            self.advance();
-                        } else {
-                            break;
-                        }
-                    }
-
-                    /* Check for prefix to string */
-                    match text.as_str() {
-                        "r" | "u" | "R" | "U" | "f" | "F" | "t" | "T"
-                        | "fr" | "Fr" | "fR" | "FR" | "rf" | "rF" | "Rf" | "RF"
-                        | "tr" | "Tr" | "tR" | "TR" | "rt" | "rT" | "Rt" | "RT" => {
-
-                            let peek_char = self.peek();
-                            match &peek_char {
-                                Some('"') | Some('\'') => {
-                                    nodes.push(self.handle_strings(Some(text), peek_char.unwrap(), self.line, pos)?);
-                                    continue;
-                                },
-                                _ => ()
-                            }
-                        },
-                        _ => ()
-                    }
-
-                    match text.as_str() {
-                        "False" => nodes.push(Token::False(self.line, pos)),
-                        "True" => nodes.push(Token::True(self.line, pos)),
-                        "None" => nodes.push(Token::None(self.line, pos)),
-                        "and" => nodes.push(Token::And(self.line, pos)),
-                        "as" => nodes.push(Token::As(self.line, pos)),
-                        "assert" => nodes.push(Token::Assert(self.line, pos)),
-                        "async" => nodes.push(Token::Async(self.line, pos)),
-                        "await" => nodes.push(Token::Await(self.line, pos)),
-                        "break" => nodes.push(Token::Break(self.line, pos)),
-                        "class" => nodes.push(Token::Class(self.line, pos)),
-                        "continue" => nodes.push(Token::Continue(self.line, pos)),
-                        "def" => nodes.push(Token::Def(self.line, pos)),
-                        "del" => nodes.push(Token::Del(self.line, pos)),
-                        "elif" => nodes.push(Token::Elif(self.line, pos)),
-                        "else" => nodes.push(Token::Else(self.line, pos)),
-                        "except" => nodes.push(Token::Except(self.line, pos)),
-                        "finally" => nodes.push(Token::Finally(self.line, pos)),
-                        "for" => nodes.push(Token::For(self.line, pos)),
-                        "from" => nodes.push(Token::From(self.line, pos)),
-                        "global" => nodes.push(Token::Global(self.line, pos)),
-                        "if" => nodes.push(Token::If(self.line, pos)),
-                        "import" => nodes.push(Token::Import(self.line, pos)),
-                        "in" => nodes.push(Token::In(self.line, pos)),
-                        "is" => nodes.push(Token::Is(self.line, pos)),
-                        "lambda" => nodes.push(Token::Lambda(self.line, pos)),
-                        "nonlocal" => nodes.push(Token::Nonlocal(self.line, pos)),
-                        "not" => nodes.push(Token::Not(self.line, pos)),
-                        "or" => nodes.push(Token::Or(self.line, pos)),
-                        "pass" => nodes.push(Token::Pass(self.line, pos)),
-                        "raise" => nodes.push(Token::Raise(self.line, pos)),
-                        "return" => nodes.push(Token::Return(self.line, pos)),
-                        "try" => nodes.push(Token::Try(self.line, pos)),
-                        "while" => nodes.push(Token::While(self.line, pos)),
-                        "with" => nodes.push(Token::With(self.line, pos)),
-                        "yield" => nodes.push(Token::Yield(self.line, pos)),
-                        _ => nodes.push(Token::Name(self.line, pos, text))
-                    }
-                },
-                '0'..='9' | '.' => {
-                    let pos = self.column;
-
-                    if ch == '.' {
+        'outer: loop {
+            
+            'ìnner: while let Some(ch) = self.peek() {
+                match ch {
+                    ' ' => {
                         self.advance();
-
+                        continue
+                    },
+                    '\r' => {
+                        self.advance();
                         match self.peek() {
-                            Some('0'..='9') => {
-                                nodes.push(self.handle_numbers(Some('.'), self.line, pos)?);
+                            Some('\n') => {
+                                self.advance();
+                            },
+                            _ => ()
+                        }
+
+                        self.line += 1;
+                        self.column = 1;
+
+                        if is_blank_line || self.parenthesis_stack.len() > 0 {
+                            continue // Fix
+                        }
+                        nodes.push(Token::Newline(self.line, self.column));
+                    },
+                    '\n' => {
+                        self.advance();
+                        self.line += 1;
+                        self.column = 1;
+
+                        if is_blank_line || self.parenthesis_stack.len() > 0 {
+                            continue // Fix
+                        }
+                        nodes.push(Token::Newline(self.line, self.column));
+                    },
+                    '\\' => {
+                        self.advance();
+                        match self.peek() {
+                            Some('\r') => {
+                                self.advance();
+                                match self.peek() {
+                                    Some('\n') => {
+                                        self.advance();
+                                    },
+                                    _ => ()
+                                }
+                                self.line += 1;
+                                self.column = 1;
+                            },
+                            Some('\n') => {
+                                self.advance();
+                                self.line += 1;
+                                self.column = 1;
                             },
                             _ => {
-                                nodes.push(Token::Period(self.line, pos));
+                                return Err(SyntaxError::new(self.line, self.column, String::from("Line continuation not followed by newline")));
                             }
                         }
                         continue
-                    }
-                    nodes.push(self.handle_numbers(None, self.line, pos)?);
-                }
-                '(' => {
-                    self.advance();
-                    self.parenthesis_stack.push(ch);
-                    nodes.push(Token::LeftParen(self.line, self.column - 1));
-                },
-                ')' => {
-                    self.advance();
-                    match self.parenthesis_stack.pop() {
-                        Some(x) => {
-                            if x == '(' {
-                                nodes.push(Token::RightParen(self.line, self.column - 1));
+                    },
+                    '\t' => {
+                        self.advance();
+                        continue
+                    },
+                    '\'' | '"' => {
+                        nodes.push(self.handle_strings(None, ch, self.line, self.column)?);
+                        continue;
+                    },
+                    ch if self.is_identifier_start(ch) => {
+                        let pos = self.column;
+                        let mut text = String::new();
+
+                        while let Some(ch) = self.peek() {
+                            if self.is_identifier_char(ch) {
+                                text.push(ch);
+                                self.advance();
                             } else {
-                                return Err(SyntaxError::new(self.line, self.column - 1, format!("Mismatched parenthesis, found ')' without matching '('!")));
+                                break;
                             }
-                        },
-                        None => {
-                            return Err(SyntaxError::new(self.line, self.column - 1, format!("No opening parenthesis found for ')'!")));
                         }
+
+                        /* Check for prefix to string */
+                        match text.as_str() {
+                            "r" | "u" | "R" | "U" | "f" | "F" | "t" | "T"
+                            | "fr" | "Fr" | "fR" | "FR" | "rf" | "rF" | "Rf" | "RF"
+                            | "tr" | "Tr" | "tR" | "TR" | "rt" | "rT" | "Rt" | "RT" => {
+                                let peek_char = self.peek();
+                                match &peek_char {
+                                    Some('"') | Some('\'') => {
+                                        nodes.push(self.handle_strings(Some(text), peek_char.unwrap(), self.line, pos)?);
+                                        continue;
+                                    },
+                                    _ => ()
+                                }
+                            },
+                            _ => ()
+                        }
+
+                        match text.as_str() {
+                            "False" => nodes.push(Token::False(self.line, pos)),
+                            "True" => nodes.push(Token::True(self.line, pos)),
+                            "None" => nodes.push(Token::None(self.line, pos)),
+                            "and" => nodes.push(Token::And(self.line, pos)),
+                            "as" => nodes.push(Token::As(self.line, pos)),
+                            "assert" => nodes.push(Token::Assert(self.line, pos)),
+                            "async" => nodes.push(Token::Async(self.line, pos)),
+                            "await" => nodes.push(Token::Await(self.line, pos)),
+                            "break" => nodes.push(Token::Break(self.line, pos)),
+                            "class" => nodes.push(Token::Class(self.line, pos)),
+                            "continue" => nodes.push(Token::Continue(self.line, pos)),
+                            "def" => nodes.push(Token::Def(self.line, pos)),
+                            "del" => nodes.push(Token::Del(self.line, pos)),
+                            "elif" => nodes.push(Token::Elif(self.line, pos)),
+                            "else" => nodes.push(Token::Else(self.line, pos)),
+                            "except" => nodes.push(Token::Except(self.line, pos)),
+                            "finally" => nodes.push(Token::Finally(self.line, pos)),
+                            "for" => nodes.push(Token::For(self.line, pos)),
+                            "from" => nodes.push(Token::From(self.line, pos)),
+                            "global" => nodes.push(Token::Global(self.line, pos)),
+                            "if" => nodes.push(Token::If(self.line, pos)),
+                            "import" => nodes.push(Token::Import(self.line, pos)),
+                            "in" => nodes.push(Token::In(self.line, pos)),
+                            "is" => nodes.push(Token::Is(self.line, pos)),
+                            "lambda" => nodes.push(Token::Lambda(self.line, pos)),
+                            "nonlocal" => nodes.push(Token::Nonlocal(self.line, pos)),
+                            "not" => nodes.push(Token::Not(self.line, pos)),
+                            "or" => nodes.push(Token::Or(self.line, pos)),
+                            "pass" => nodes.push(Token::Pass(self.line, pos)),
+                            "raise" => nodes.push(Token::Raise(self.line, pos)),
+                            "return" => nodes.push(Token::Return(self.line, pos)),
+                            "try" => nodes.push(Token::Try(self.line, pos)),
+                            "while" => nodes.push(Token::While(self.line, pos)),
+                            "with" => nodes.push(Token::With(self.line, pos)),
+                            "yield" => nodes.push(Token::Yield(self.line, pos)),
+                            _ => nodes.push(Token::Name(self.line, pos, text))
+                        }
+                    },
+                    '0'..='9' | '.' => {
+                        let pos = self.column;
+
+                        if ch == '.' {
+                            self.advance();
+
+                            match self.peek() {
+                                Some('0'..='9') => {
+                                    nodes.push(self.handle_numbers(Some('.'), self.line, pos)?);
+                                },
+                                _ => {
+                                    nodes.push(Token::Period(self.line, pos));
+                                }
+                            }
+                            continue
+                        }
+                        nodes.push(self.handle_numbers(None, self.line, pos)?);
                     }
-                },
-                '[' => {
-                    self.advance();
-                    self.parenthesis_stack.push(ch);
-                    nodes.push(Token::LeftBracket(self.line, self.column - 1));
-                },
-                ']' => {
-                    self.advance();
-                    match self.parenthesis_stack.pop() {
-                        Some(x) => {
-                            if x == '[' {
-                                nodes.push(Token::RightBracket(self.line, self.column - 1));
+                    '(' => {
+                        self.advance();
+                        self.parenthesis_stack.push(ch);
+                        nodes.push(Token::LeftParen(self.line, self.column - 1));
+                    },
+                    ')' => {
+                        self.advance();
+                        match self.parenthesis_stack.pop() {
+                            Some(x) => {
+                                if x == '(' {
+                                    nodes.push(Token::RightParen(self.line, self.column - 1));
+                                } else {
+                                    return Err(SyntaxError::new(self.line, self.column - 1, format!("Mismatched parenthesis, found ')' without matching '('!")));
+                                }
+                            },
+                            None => {
+                                return Err(SyntaxError::new(self.line, self.column - 1, format!("No opening parenthesis found for ')'!")));
+                            }
+                        }
+                    },
+                    '[' => {
+                        self.advance();
+                        self.parenthesis_stack.push(ch);
+                        nodes.push(Token::LeftBracket(self.line, self.column - 1));
+                    },
+                    ']' => {
+                        self.advance();
+                        match self.parenthesis_stack.pop() {
+                            Some(x) => {
+                                if x == '[' {
+                                    nodes.push(Token::RightBracket(self.line, self.column - 1));
+                                } else {
+                                    return Err(SyntaxError::new(self.line, self.column - 1, format!("Mismatched parenthesis, found ']' without matching '['!")));
+                                }
+                            },
+                            None => {
+                                return Err(SyntaxError::new(self.line, self.column - 1, format!("No opening parenthesis found for ']'!")));
+                            }
+                        }
+                    },
+                    '{' => {
+                        self.advance();
+                        self.parenthesis_stack.push(ch);
+                        nodes.push(Token::LeftCurly(self.line, self.column - 1));
+                    },
+                    '}' => {
+                        self.advance();
+                        match self.parenthesis_stack.pop() {
+                            Some(x) => {
+                                if x == '{' {
+                                    nodes.push(Token::RightCurly(self.line, self.column - 1));
+                                } else {
+                                    return Err(SyntaxError::new(self.line, self.column - 1, format!("Mismatched parenthesis, found '}}' without matching '{{'!")));
+                                }
+                            },
+                            None => {
+                                return Err(SyntaxError::new(self.line, self.column - 1, format!("No opening parenthesis found for '}}'!")));
+                            }
+                        }
+                    },
+                    '+' => {
+                        self.advance();
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::PlusAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::Plus(self.line, self.column - 1))
+                        }
+                    },
+                    '-' => {
+                        self.advance();
+                        if let Some('>') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::Arrow(self.line, self.column - 2))
+                        } else if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::MinusAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::Minus(self.line, self.column - 1))
+                        }
+                    },
+                    '*' => {
+                        self.advance();
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::StarAssign(self.line, self.column - 2))
+                        } else if let Some('*') = self.peek() {
+                            self.advance();
+                            if let Some('=') = self.peek() {
+                                self.advance();
+                                nodes.push(Token::PowerAssign(self.line, self.column - 3))
                             } else {
-                                return Err(SyntaxError::new(self.line, self.column - 1, format!("Mismatched parenthesis, found ']' without matching '['!")));
+                                nodes.push(Token::Power(self.line, self.column - 2))
                             }
-                        },
-                        None => {
-                            return Err(SyntaxError::new(self.line, self.column - 1, format!("No opening parenthesis found for ']'!")));
+                        } else {
+                            nodes.push(Token::Star(self.line, self.column - 1))
                         }
-                    }
-                },
-                '{' => {
-                    self.advance();
-                    self.parenthesis_stack.push(ch);
-                    nodes.push(Token::LeftCurly(self.line, self.column - 1));
-                },
-                '}' => {
-                    self.advance();
-                    match self.parenthesis_stack.pop() {
-                        Some(x) => {
-                            if x == '{' {
-                                nodes.push(Token::RightCurly(self.line, self.column - 1));
+                    },
+                    '/' => {
+                        self.advance();
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::SlashAssign(self.line, self.column - 2))
+                        } else if let Some('/') = self.peek() {
+                            self.advance();
+                            if let Some('=') = self.peek() {
+                                self.advance();
+                                nodes.push(Token::SlashSlashAssign(self.line, self.column - 3))
                             } else {
-                                return Err(SyntaxError::new(self.line, self.column - 1, format!("Mismatched parenthesis, found '}}' without matching '{{'!")));
+                                nodes.push(Token::SlashSlash(self.line, self.column - 2))
                             }
-                        },
-                        None => {
-                            return Err(SyntaxError::new(self.line, self.column - 1, format!("No opening parenthesis found for '}}'!")));
+                        } else {
+                            nodes.push(Token::Slash(self.line, self.column - 1))
                         }
-                    }
-                },
-                '+' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                    },
+                    '%' => {
                         self.advance();
-                        nodes.push(Token::PlusAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::Plus(self.line, self.column - 1))
-                    }
-                },
-                '-' => {
-                    self.advance();
-                    if let Some('>') = self.peek() {
-                        self.advance();
-                        nodes.push(Token::Arrow(self.line, self.column - 2))
-                    } else if let Some('=') = self.peek() {
-                        self.advance();
-                        nodes.push(Token::MinusAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::Minus(self.line, self.column - 1))
-                    }
-                },
-                '*' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
-                        self.advance();
-                        nodes.push(Token::StarAssign(self.line, self.column - 2))
-                    } else if let Some('*') = self.peek() {
-                        self.advance();
-                         if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
                             self.advance();
-                            nodes.push(Token::PowerAssign(self.line, self.column - 3))
-                         } else {
-                            nodes.push(Token::Power(self.line, self.column - 2))
-                         }
-                    } else {
-                        nodes.push(Token::Star(self.line, self.column - 1))
-                    }
-                },
-                '/' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                            nodes.push(Token::ModuloAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::Modulo(self.line, self.column - 1))
+                        }
+                    },
+                    '@' => {
                         self.advance();
-                        nodes.push(Token::SlashAssign(self.line, self.column - 2))
-                    } else if let Some('/') = self.peek() {
-                        self.advance();
-                         if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
                             self.advance();
-                            nodes.push(Token::SlashSlashAssign(self.line, self.column - 3))
-                         } else {
-                            nodes.push(Token::SlashSlash(self.line, self.column - 2))
-                         }
-                    } else {
-                        nodes.push(Token::Slash(self.line, self.column - 1))
-                    }
-                },
-                 '%' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                            nodes.push(Token::DecoratorAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::Decorator(self.line, self.column - 1))
+                        }
+                    },
+                    '<' => {
                         self.advance();
-                        nodes.push(Token::ModuloAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::Modulo(self.line, self.column - 1))
-                    }
-                },
-                 '@' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
-                        self.advance();
-                        nodes.push(Token::DecoratorAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::Decorator(self.line, self.column - 1))
-                    }
-                },
-                '<' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
-                        self.advance();
-                        nodes.push(Token::LessEqual(self.line, self.column - 2))
-                    } else if let Some('<') = self.peek() {
-                        self.advance();
-                         if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
                             self.advance();
-                            nodes.push(Token::ShiftLeftAssign(self.line, self.column - 3))
-                         } else {
-                            nodes.push(Token::ShiftLeft(self.line, self.column - 2))
-                         }
-                    } else {
-                        nodes.push(Token::Less(self.line, self.column - 1))
-                    }
-                },
-                '>' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
-                        self.advance();
-                        nodes.push(Token::GreaterEqual(self.line, self.column - 2))
-                    } else if let Some('>') = self.peek() {
-                        self.advance();
-                         if let Some('=') = self.peek() {
+                            nodes.push(Token::LessEqual(self.line, self.column - 2))
+                        } else if let Some('<') = self.peek() {
                             self.advance();
-                            nodes.push(Token::ShiftRightAssign(self.line, self.column - 3))
-                         } else {
-                            nodes.push(Token::ShiftRight(self.line, self.column - 2))
-                         }
-                    } else {
-                        nodes.push(Token::Greater(self.line, self.column - 1))
-                    }
-                },
-                '=' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                            if let Some('=') = self.peek() {
+                                self.advance();
+                                nodes.push(Token::ShiftLeftAssign(self.line, self.column - 3))
+                            } else {
+                                nodes.push(Token::ShiftLeft(self.line, self.column - 2))
+                            }
+                        } else {
+                            nodes.push(Token::Less(self.line, self.column - 1))
+                        }
+                    },
+                    '>' => {
                         self.advance();
-                        nodes.push(Token::Equal(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::Assign(self.line, self.column - 1))
-                    }
-                },
-                '!' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::GreaterEqual(self.line, self.column - 2))
+                        } else if let Some('>') = self.peek() {
+                            self.advance();
+                            if let Some('=') = self.peek() {
+                                self.advance();
+                                nodes.push(Token::ShiftRightAssign(self.line, self.column - 3))
+                            } else {
+                                nodes.push(Token::ShiftRight(self.line, self.column - 2))
+                            }
+                        } else {
+                            nodes.push(Token::Greater(self.line, self.column - 1))
+                        }
+                    },
+                    '=' => {
                         self.advance();
-                        nodes.push(Token::NotEqual(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::BitwiseNot(self.line, self.column - 1))
-                    }
-                },
-                ':' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::Equal(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::Assign(self.line, self.column - 1))
+                        }
+                    },
+                    '!' => {
                         self.advance();
-                        nodes.push(Token::ColonEqual(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::Colon(self.line, self.column - 1))
-                    }
-                },
-                '&' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::NotEqual(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::BitwiseNot(self.line, self.column - 1))
+                        }
+                    },
+                    ':' => {
                         self.advance();
-                        nodes.push(Token::BitwiseAndAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::BitwiseAnd(self.line, self.column - 1))
-                    }
-                },
-                '|' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::ColonEqual(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::Colon(self.line, self.column - 1))
+                        }
+                    },
+                    '&' => {
                         self.advance();
-                        nodes.push(Token::BitwiseOrAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::BitwiseOr(self.line, self.column - 1))
-                    }
-                },
-                '^' => {
-                    self.advance();
-                    if let Some('=') = self.peek() {
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::BitwiseAndAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::BitwiseAnd(self.line, self.column - 1))
+                        }
+                    },
+                    '|' => {
                         self.advance();
-                        nodes.push(Token::BitwiseXorAssign(self.line, self.column - 2))
-                    } else {
-                        nodes.push(Token::BitwiseXor(self.line, self.column - 1))
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::BitwiseOrAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::BitwiseOr(self.line, self.column - 1))
+                        }
+                    },
+                    '^' => {
+                        self.advance();
+                        if let Some('=') = self.peek() {
+                            self.advance();
+                            nodes.push(Token::BitwiseXorAssign(self.line, self.column - 2))
+                        } else {
+                            nodes.push(Token::BitwiseXor(self.line, self.column - 1))
+                        }
+                    },
+                    ';' => {
+                        self.advance();
+                        nodes.push(Token::Semicolon(self.line, self.column - 1))
+                    },
+                    ',' => {
+                        self.advance();
+                        nodes.push(Token::Comma(self.line, self.column - 1))
+                    },
+                    '~' => {
+                        self.advance();
+                        nodes.push(Token::BitwiseInvert(self.line, self.column - 1))
+                    },
+                    _ => {
+                        let _ = self.advance();
                     }
-                },
-                ';' => {
-                    self.advance();
-                    nodes.push(Token::Semicolon(self.line, self.column - 1))
-                },
-                ',' => {
-                    self.advance();
-                    nodes.push(Token::Comma(self.line, self.column - 1))
-                },
-                '~' => {
-                    self.advance();
-                    nodes.push(Token::BitwiseInvert(self.line, self.column - 1))
-                },
-                _ => {
-                    let _ = self.advance();
                 }
             }
+            
+            break 'outer
         }
 
         nodes.push(Token::EOF(self.line, self.column));
