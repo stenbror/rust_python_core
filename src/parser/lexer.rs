@@ -718,10 +718,6 @@ impl PythonCoreLexer {
                         }
                         continue
                     },
-                    '\t' => {
-                        self.advance();
-                        continue
-                    },
                     '\'' | '"' => {
                         nodes.push(self.handle_strings(None, ch, self.line, self.column)?);
                         continue;
