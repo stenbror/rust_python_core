@@ -544,9 +544,8 @@ impl PythonCoreLexer {
 
         Ok(Token::String(start_line, start_column, text))
     }
-
-
-
+    
+    /* Main tokenizer loop function */
     pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
         let mut is_blank_line = false;
@@ -637,10 +636,17 @@ impl PythonCoreLexer {
                 }
             }
 
+            /* Main tokenizer loop */
             while let Some(ch) = self.peek() {
                 match ch {
                     ' ' => {
                         self.advance();
+                        continue
+                    },
+                    '\t' => {
+                        self.advance();
+                        self.column -= 1; /* Syncing back before calculating tab size advance */
+                        self.column = (self.column / self.tab_size + 1) * self.tab_size;
                         continue
                     },
                     '#' => {
@@ -4218,6 +4224,28 @@ mod lexical_analyzer_tests {
         match symbols {
             Ok(x) => {
                 assert_eq!(2, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_tabulator_between_tokens() {
+        let symbols = PythonCoreLexer::new("pass;\tpass").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Pass(1, 1),
+            Token::Semicolon(1, 5),
+            Token::Pass(1, 8),
+            Token::EOF(1, 12)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(4, x.len());
                 assert_eq!(expected, x);
             },
             Err(_) => {
