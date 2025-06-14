@@ -7,7 +7,9 @@ pub struct PythonCoreLexer {
     line: usize,
     column: usize,
     indent_stack: Vec<usize>,
-    parenthesis_stack: Vec<char>
+    parenthesis_stack: Vec<char>,
+    tab_size: usize,
+    is_interactive: bool
 }
 
 impl PythonCoreLexer {
@@ -18,8 +20,20 @@ impl PythonCoreLexer {
             line: 1,
             column: 1,
             indent_stack: vec![0],
-            parenthesis_stack: Vec::new()
+            parenthesis_stack: Vec::new(),
+            tab_size: 8,
+            is_interactive: false
         }
+    }
+
+    pub fn set_tab_size(&mut self, size: usize) -> &mut Self {
+        self.tab_size = size;
+        self
+    }
+
+    pub fn set_interactive(&mut self) -> &mut Self {
+        self.is_interactive = true;
+        self
     }
 
     fn peek(&self) -> Option<char> {
@@ -536,20 +550,82 @@ impl PythonCoreLexer {
     pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
         let mut is_blank_line = false;
-        let mut at_bol = true;
+        let mut at_bol = false;
         let mut pending = 0;
+        let mut col :usize = 0;
+        self.indent_stack.push(0);
 
         'outer: loop {
             is_blank_line = false;
 
-            if (at_bol) {
-                at_bol = false;
+            if at_bol {
+                at_bol = true;
 
+                while let Some(ch) = self.peek() {
+                    match ch {
+                        ' ' => {
+                            self.advance();
+                            col += 1;
+                        },
+                        '\t' => {
+                            self.advance();
+                            col = (col / self.tab_size + 1) * self.tab_size;
+                        },
+                        _ => break
+                    }
+                }
+
+                /* Line containing only whitespace and possibly comment is not handled as NEWLINE */
+                match self.peek() {
+                    Some('#') => {
+                        is_blank_line = true;
+                    },
+                    Some('\r') => {
+                        if col == 0 && self.is_interactive {
+                            is_blank_line = false
+                        }
+                        else if self.line == 1 && self.is_interactive {
+                            is_blank_line = false
+                        }
+                        else {
+                            is_blank_line = true
+                        }
+                    },
+                    Some('\n') => {
+                        if col == 0 && self.is_interactive {
+                            is_blank_line = false
+                        }
+                        else if self.line == 1 && self.is_interactive {
+                            is_blank_line = false
+                        }
+                        else {
+                            is_blank_line = true
+                        }
+                    },
+                    _ => ()
+                }
+
+                if !is_blank_line && self.parenthesis_stack.is_empty() {
+                    let pos = self.indent_stack.last().unwrap().clone();
+                    if (col > pos) {
+                        pending += 1;
+                        self.indent_stack.push(col);
+                    }
+                    else if col < pos {
+                        while self.indent_stack.len() > 1 &&  col < self.indent_stack.last().unwrap().clone() {
+                            pending -= 1;
+                            self.indent_stack.pop();
+                        }
+                    }
+                    if col != self.indent_stack.last().unwrap().clone() {
+                        return Err(SyntaxError::new(self.line, self.column, String::from("Inconsistent indentation level!")));   
+                    }
+                }
             }
 
             /* Handle pending indent or dedent(s) */
-            if (pending != 0) {
-                if (pending > 0) {
+            if pending != 0 {
+                if pending > 0 {
                     pending -= 1;
                     nodes.push(Token::Indent(self.line, self.column))
                 }
@@ -580,7 +656,7 @@ impl PythonCoreLexer {
                         self.column = 1;
 
                         if is_blank_line || self.parenthesis_stack.len() > 0 {
-                            continue // Fix
+                            continue 'outer;
                         }
                         nodes.push(Token::Newline(self.line, self.column));
                     },
@@ -590,7 +666,7 @@ impl PythonCoreLexer {
                         self.column = 1;
 
                         if is_blank_line || self.parenthesis_stack.len() > 0 {
-                            continue // Fix
+                            continue 'outer
                         }
                         nodes.push(Token::Newline(self.line, self.column));
                     },
