@@ -536,11 +536,32 @@ impl PythonCoreLexer {
     pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
         let mut is_blank_line = false;
-        let mut at_bol = false;
+        let mut at_bol = true;
+        let mut pending = 0;
 
         'outer: loop {
-            
-            'ìnner: while let Some(ch) = self.peek() {
+            is_blank_line = false;
+
+            if (at_bol) {
+                at_bol = false;
+
+            }
+
+            /* Handle pending indent or dedent(s) */
+            if (pending != 0) {
+                if (pending > 0) {
+                    pending -= 1;
+                    nodes.push(Token::Indent(self.line, self.column))
+                }
+                else {
+                    while pending < 0 {
+                        pending += 1;
+                        nodes.push(Token::Dedent(self.line, self.column))
+                    }
+                }
+            }
+
+            while let Some(ch) = self.peek() {
                 match ch {
                     ' ' => {
                         self.advance();
@@ -931,7 +952,7 @@ impl PythonCoreLexer {
                     }
                 }
             }
-            
+
             break 'outer
         }
 
