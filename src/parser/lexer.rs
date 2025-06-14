@@ -643,6 +643,23 @@ impl PythonCoreLexer {
                         self.advance();
                         continue
                     },
+                    '#' => {
+                        let mut text = String::new();
+                        text.push(ch);
+                        self.advance();
+                        while let ch2 = self.peek() {
+                            match ch2 {
+                                Some('\r') | Some('\n') | None => break,
+                                _ => {
+                                    text.push(self.advance().unwrap());
+                                }
+                            }
+                        }
+                        if text.starts_with("# type:") {
+                            todo!()
+                        }
+                        continue  'outer; /* Standard comment that is ignored */
+                    },
                     '\r' => {
                         self.advance();
                         match self.peek() {
@@ -4181,6 +4198,26 @@ mod lexical_analyzer_tests {
         match symbols {
             Ok(x) => {
                 assert_eq!(4, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_standard_comment() {
+        let symbols = PythonCoreLexer::new("# This is a test\r\n").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Newline(2, 1),
+            Token::EOF(2, 1)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(2, x.len());
                 assert_eq!(expected, x);
             },
             Err(_) => {
