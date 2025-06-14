@@ -607,7 +607,7 @@ impl PythonCoreLexer {
 
                 if !is_blank_line && self.parenthesis_stack.is_empty() {
                     let pos = self.indent_stack.last().unwrap().clone();
-                    if (col > pos) {
+                    if col > pos {
                         pending += 1;
                         self.indent_stack.push(col);
                     }
