@@ -89,5 +89,6 @@ pub enum Token
     PowerAssign(usize, usize),
     Name(usize, usize, String),
     Number(usize, usize, String),
-    String(usize, usize, String)
+    String(usize, usize, String),
+    TypeComment(usize, usize, String)
 }

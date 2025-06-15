@@ -544,7 +544,7 @@ impl PythonCoreLexer {
 
         Ok(Token::String(start_line, start_column, text))
     }
-    
+
     /* Main tokenizer loop function */
     pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
@@ -650,6 +650,7 @@ impl PythonCoreLexer {
                         continue
                     },
                     '#' => {
+                        let pos = self.column;
                         let mut text = String::new();
                         text.push(ch);
                         self.advance();
@@ -662,7 +663,7 @@ impl PythonCoreLexer {
                             }
                         }
                         if text.starts_with("# type:") {
-                            todo!()
+                            nodes.push(Token::TypeComment(self.line, pos, text))
                         }
                         continue  'outer; /* Standard comment that is ignored */
                     },
@@ -4242,6 +4243,27 @@ mod lexical_analyzer_tests {
         match symbols {
             Ok(x) => {
                 assert_eq!(4, x.len());
+                assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_type_comment() {
+        let symbols = PythonCoreLexer::new("# type: ignore\r\n").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::TypeComment(1, 1, String::from("# type: ignore")),
+            Token::Newline(2, 1),
+            Token::EOF(2, 1)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
                 assert_eq!(expected, x);
             },
             Err(_) => {
