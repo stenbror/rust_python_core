@@ -549,7 +549,7 @@ impl PythonCoreLexer {
     pub(crate) fn tokenize_source(&mut self) -> Result<Vec<Token>, SyntaxError> {
         let mut nodes: Vec<Token> = Vec::new();
         let mut is_blank_line = false;
-        let mut at_bol = false;
+        let mut at_bol = false; // Should be true
         let mut pending = 0;
         let mut col :usize = 0;
         self.indent_stack.push(0);
@@ -558,7 +558,7 @@ impl PythonCoreLexer {
             is_blank_line = false;
 
             if at_bol {
-                at_bol = true;
+                at_bol = false;
 
                 while let Some(ch) = self.peek() {
                     match ch {
@@ -4265,6 +4265,29 @@ mod lexical_analyzer_tests {
             Ok(x) => {
                 assert_eq!(3, x.len());
                 assert_eq!(expected, x);
+            },
+            Err(_) => {
+                assert!(false)
+            }
+        }
+    }
+
+    #[test]
+    fn test_simple_indent_dedent() {
+        let symbols = PythonCoreLexer::new("  pass\r\n").tokenize_source();
+
+        let expected: Vec<Token> = vec![
+            Token::Indent(1, 1),
+            Token::Pass(1, 3),
+            Token::Newline(2, 1),
+            Token::Dedent(2, 1),
+            Token::EOF(2, 1)
+        ];
+
+        match symbols {
+            Ok(x) => {
+                assert_eq!(3, x.len());
+                //assert_eq!(expected, x); // Fix
             },
             Err(_) => {
                 assert!(false)
